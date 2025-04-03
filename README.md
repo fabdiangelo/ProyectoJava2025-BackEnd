@@ -8,6 +8,8 @@ Completo
 
 Epada 2:Implementacion de proyecto
 Tareas:
-Fabricio:Usuarios, Pagos y apis
+Fabricio:Usuarios, Pagos y apis.
+
 Alex:Systema, Interfaces, comunicacion de clases.
+
 Pablo:Content, articulos, Testing.
