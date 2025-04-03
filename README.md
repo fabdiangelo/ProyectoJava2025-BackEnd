@@ -1,1 +1,1 @@
-Taller JavaScript
+Taller Java 2025
