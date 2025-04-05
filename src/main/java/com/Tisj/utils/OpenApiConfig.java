@@ -12,7 +12,7 @@ public class OpenApiConfig {
     public GroupedOpenApi publicApi(){
         return GroupedOpenApi.builder()
                 .group("tallerJava")
-                .pathsToMatch("/api/**")
+                .pathsToMatch("/**")
                 .build();
     }
 
