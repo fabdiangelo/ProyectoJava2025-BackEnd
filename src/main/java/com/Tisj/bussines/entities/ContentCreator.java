@@ -1,6 +1,11 @@
 package com.Tisj.bussines.entities;
 
-public class ContentCreator {
+import jakarta.persistence.Entity;
+import lombok.Data;
+
+@Data
+@Entity
+public class ContentCreator extends Usuario{
 
 //    public Video verVideo(){
 //        return null;

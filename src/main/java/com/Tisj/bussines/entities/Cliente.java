@@ -1,10 +1,12 @@
 package com.Tisj.bussines.entities;
 
+import jakarta.persistence.Entity;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@Entity
 public class Cliente extends Usuario{
 //    private List<EstadoCompletado> estadosCursos;
 //    private List<CursoCliente> cursos;
