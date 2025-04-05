@@ -1,6 +1,6 @@
 package com.Tisj.bussines.entities;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
@@ -11,8 +11,10 @@ public class Cliente extends Usuario{
 //    private List<EstadoCompletado> estadosCursos;
 //    private List<CursoCliente> cursos;
 //    private List<Reserva> reservas;
-//    private Carrito carrito;
-//    private List<Pago> pagos;
+    @OneToOne
+    private Carrito carrito;
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.REFRESH, orphanRemoval = true)
+    private List<Pago> pagos;
 
     public Void realizarPago(){
         return null;
