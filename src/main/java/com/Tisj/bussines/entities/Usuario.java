@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Entity
 public abstract class Usuario {
+
     @Id
     private String email;
     private String password;
