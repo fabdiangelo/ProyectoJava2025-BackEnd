@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ISystem {
 
-    
+
     Usuario RegistrarUsuario();
     void ModificarUsuario();
     void EliminarUsuario();
@@ -19,6 +19,7 @@ public interface ISystem {
     Pago CrearPago();
     System crearSystem();
     Carrito crearCarrito();
+    
 //    Paquete CrearPaquete();
 //    Curso CrearCurso();
 //    List<Curso> ListarCursos();
