@@ -20,3 +20,27 @@
 
 *Favor de crear sus respectivas clases en*  
 **src/main/java/com/Tisj/bussines/entities**
+
+Apis usadas
+MaiApi creacion propia de Fabricio
+Api Paypal
+Api MercadoPago
+Api Youtube (Para los videos y su duracion)
+Api  Supabase.com (para almacenamiento en la nube de base de datos)
+
+Base de datos
+Postgres
+Nombre
+	Solariana
+
+Frontend
+	React.js
+	PrimeReact
+	
+Backend
+	Java
+	Springboot
+
+Testing
+	Swagger
+	
