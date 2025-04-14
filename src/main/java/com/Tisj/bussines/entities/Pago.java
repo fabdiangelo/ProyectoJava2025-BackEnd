@@ -15,11 +15,10 @@ public class Pago {
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private Cliente cliente;
+    private Usuario cliente;
 
     private LocalDate fechaPago;
     private Float monto;
-
 
     public DTFactura realizarFacturacion(){
         return new DTFactura(
