@@ -1,21 +1,31 @@
 package com.Tisj.bussines.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
 @Entity
-public abstract class Usuario {
+public class Usuario {
 
     @Id
     private String email;
     private String password;
-    private String Nombre;
+    private String nombre;
+    private String apellido;
+    private char genero;
+    private LocalDate nacimiento;
     private String emailRecuperacion;
-//    private List<Curso> cursos;
+    private Boolean activo;
+
+    @ManyToMany
+    @JoinTable(name = "USUARIOS_ROLES",
+            joinColumns = @JoinColumn(name = "USUARIO"),
+            inverseJoinColumns = @JoinColumn(name = "ID_ROL"))
+    private List<RolUsuario> roles;
+//    private List<Articulo> articulos;
 
     public Void modificarContrasena(){
         return null;

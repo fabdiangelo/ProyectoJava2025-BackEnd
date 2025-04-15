@@ -20,11 +20,11 @@ public class System implements ISystem {
         return instance;
     }
 
-
-    @Override
-    public Usuario RegistrarUsuario() {
-        return null;
-    }
+//
+//    @Override
+//    public Usuario RegistrarUsuario() {
+//        return null;
+//    }
 
     @Override
     public void ModificarUsuario() {
@@ -56,10 +56,10 @@ public class System implements ISystem {
 
     }
 
-    @Override
-    public List<Usuario> ListarUsuario() {
-        return List.of();
-    }
+//    @Override
+//    public List<Usuario> ListarUsuario() {
+//        return List.of();
+//    }
 
     @Override
     public Pago CrearPago() {

@@ -11,18 +11,6 @@ public class Factory {
         return System.getInstance();
     }
 
-    public static Cliente crearCliente() {
-        return new Cliente();
-    }
-
-    public static ContentCreator crearContentCreator() {
-        return new ContentCreator();
-    }
-
-    public static Admin crearAdmin() {
-        return new Admin();
-    }
-
     public static Carrito crearCarrito() {
         return new Carrito();
     }
