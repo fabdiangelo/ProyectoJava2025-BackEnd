@@ -1,6 +1,8 @@
 package com.Tisj.api.controllers;
 
+import com.Tisj.api.requests.ModificableUsuario;
 import com.Tisj.api.response.ListadoUsuarios;
+import com.Tisj.bussines.entities.DT.DTUsuario;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.services.UsuarioService;
 import org.springframework.http.HttpStatus;
@@ -25,38 +27,83 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<ListadoUsuarios> getPersonas(){
+    public ResponseEntity<ListadoUsuarios> getListaUsuarios(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))
         ) {
             ListadoUsuarios response = usuarioService.listadoPersonas();
+            if(response == null) return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
     }
 
-//    @PostMapping("/admin")
-//    public ResponseEntity<String> createAdmin(@RequestBody Usuario admin){
-//        String response = usuarioService.crearAdmin(admin);
-//        if(response == null){
-//            return new ResponseEntity<>("Error al crear a la persona", HttpStatus.BAD_REQUEST);
-//        }else{
-//            return  new ResponseEntity<>(response, HttpStatus.CREATED);
-//        }
-//    }
-
-    @PostMapping("/user")
-    public ResponseEntity<String> createUser(@RequestBody Usuario cliente){
-        String response = usuarioService.crearCliente(cliente);
-        if(response == null){
-            return new ResponseEntity<>("Error al crear a la persona", HttpStatus.BAD_REQUEST);
+    @GetMapping("/{email}")
+    public ResponseEntity<DTUsuario> getUsuario(@PathVariable(name = "email") String email) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
+        ) {
+            DTUsuario response = usuarioService.getUsuario(email);
+            if(response == null) return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }else{
-            return  new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping()
+    public ResponseEntity<String> createUser(@RequestBody Usuario user){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
+        ) {
+            String response = usuarioService.crearCliente(user);
+            if(response == null){
+                return new ResponseEntity<>("Error al crear el usuario", HttpStatus.BAD_REQUEST);
+            }else{
+                return  new ResponseEntity<>(response, HttpStatus.CREATED);
+            }
+        }else{
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PutMapping()
+    public ResponseEntity<String> updateUser(@RequestBody ModificableUsuario user){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
+        ) {
+            String response = usuarioService.actualizarUsuario(user);
+            if(response == null){
+                return new ResponseEntity<>("Error al modificar el usuario", HttpStatus.BAD_REQUEST);
+            }else{
+                return  new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }else{
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+    }
+
+    @DeleteMapping("/{email}")
+    public ResponseEntity<String> deleteUser(@PathVariable(name = "email") String email){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
+        ) {
+            String response = usuarioService.eliminarUsuario(email);
+            if(response == null){
+                return new ResponseEntity<>("Error al eliminar el usuario", HttpStatus.BAD_REQUEST);
+            }else{
+                return  new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }else {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
     }
 }
