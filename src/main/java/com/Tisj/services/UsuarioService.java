@@ -1,5 +1,6 @@
 package com.Tisj.services;
 
+import com.Tisj.api.requests.ModificableUsuario;
 import com.Tisj.api.response.ListadoUsuarios;
 import com.Tisj.bussines.entities.DT.DTUsuario;
 import com.Tisj.bussines.entities.RolUsuario;
@@ -35,25 +36,13 @@ public class UsuarioService {
         return listadoUsuarios;
     }
 
-    public String crearCliente(Usuario cliente){
+    public String crearCliente(Usuario user){
         String response = null;
-        if(cliente != null && usuarioRepository.findById(cliente.getEmail()).isEmpty()){
+        if(user != null && usuarioRepository.findById(user.getEmail()).isEmpty()){
             Optional<RolUsuario> rol = rolUsuarioRepository.findByNombre("USER");
             if(rol.isPresent()){
-                agregarRolUsuario(cliente, rol.get());
-                response = "Cliente creado: " + usuarioRepository.save(cliente).getEmail();
-            }
-        }
-        return response;
-    }
-
-    public String crearAdmin(Usuario admin) {
-        String response = null;
-        if(admin != null && usuarioRepository.findById(admin.getEmail()).isEmpty()){
-            Optional<RolUsuario> rol = rolUsuarioRepository.findByNombre("ADMIN");
-            if(rol.isPresent()){
-                agregarRolUsuario(admin, rol.get());
-                response = "Admin creado: " + usuarioRepository.save(admin).getEmail();
+                agregarRolUsuario(user, rol.get());
+                response = "Cliente creado: " + usuarioRepository.save(user).getEmail();
             }
         }
         return response;
@@ -66,6 +55,33 @@ public class UsuarioService {
     }
 
 
+    public DTUsuario getUsuario(String email) {
+        Optional<Usuario> user = usuarioRepository.findById(email);
+        return user.map(Usuario::crearDT).orElse(null);
+    }
+
+    public String actualizarUsuario(ModificableUsuario changes) {
+        String response = null;
+        Usuario user = usuarioRepository.findById(changes.getEmail()).orElse(null);
+        if(user != null && changes != null){
+            user.setNombre(changes.getNombre());
+            user.setApellido(changes.getApellido());
+            user.setPassword(changes.getPassword());
+            user.setNacimiento(changes.getNacimiento());
+            user.setGenero(changes.getGenero());
+            response = "Cliente modificado: " + usuarioRepository.save(user).getEmail();
+        }
+        return response;
+    }
+
+    public String eliminarUsuario(String email) {
+        String response = null;
+        if(email != null && usuarioRepository.findById(email).isPresent()){
+            usuarioRepository.deleteByEmail(email);
+            response = "Cliente eliminado: " + email;
+        }
+        return response;
+    }
 }
 
 
