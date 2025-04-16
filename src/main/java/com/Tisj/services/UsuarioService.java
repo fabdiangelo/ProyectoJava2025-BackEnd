@@ -5,6 +5,7 @@ import com.Tisj.bussines.entities.RolUsuario;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.bussines.repositories.RolUsuarioRepository;
 import com.Tisj.bussines.repositories.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Optional;
 
 @Service
 public class UsuarioService {
+
     public final UsuarioRepository usuarioRepository;
     public final RolUsuarioRepository rolUsuarioRepository;
 
+    @Autowired
     public UsuarioService(UsuarioRepository usuarioRepository, RolUsuarioRepository rolUsuarioRepository) {
         this.usuarioRepository = usuarioRepository;
         this.rolUsuarioRepository = rolUsuarioRepository;
@@ -55,4 +58,9 @@ public class UsuarioService {
         roles.add(rol);
         user.setRoles(roles);
     }
+
+
 }
+
+
+

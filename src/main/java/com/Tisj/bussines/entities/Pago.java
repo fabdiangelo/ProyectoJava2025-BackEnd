@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @Entity
+@Table(name = "pago")
 public class Pago {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
