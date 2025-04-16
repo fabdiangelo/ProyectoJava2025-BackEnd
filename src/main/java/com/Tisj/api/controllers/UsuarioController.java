@@ -30,7 +30,6 @@ public class UsuarioController {
     public ResponseEntity<ListadoUsuarios> getPersonas(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-         auth.getAuthorities().stream().forEach((e) -> System.out.println(e));
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))
         ) {

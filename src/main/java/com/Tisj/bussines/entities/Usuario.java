@@ -1,5 +1,6 @@
 package com.Tisj.bussines.entities;
 
+import com.Tisj.bussines.entities.DT.DTUsuario;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -26,7 +27,7 @@ public class Usuario {
     private String emailRecuperacion;
     private Boolean activo;
 
-    @ManyToMany
+    @ManyToMany (fetch = FetchType.EAGER)
     @JoinTable(name = "USUARIOS_ROLES",
             joinColumns = @JoinColumn(name = "USUARIO"),
             inverseJoinColumns = @JoinColumn(name = "ID_ROL"))
@@ -39,6 +40,13 @@ public class Usuario {
     }
     public Void recuperarCuenta(String email){
         return null;
+    }
+
+    public DTUsuario crearDT(){
+        List<String> rolesStr = this.roles.stream()
+                .map(RolUsuario::getNombre)
+                .toList();
+        return new DTUsuario(email, nombre, apellido, genero, nacimiento, activo, rolesStr);
     }
 
     @Override

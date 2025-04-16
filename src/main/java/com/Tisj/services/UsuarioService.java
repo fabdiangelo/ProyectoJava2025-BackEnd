@@ -1,6 +1,7 @@
 package com.Tisj.services;
 
 import com.Tisj.api.response.ListadoUsuarios;
+import com.Tisj.bussines.entities.DT.DTUsuario;
 import com.Tisj.bussines.entities.RolUsuario;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.bussines.repositories.RolUsuarioRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -25,7 +27,11 @@ public class UsuarioService {
 
     public ListadoUsuarios listadoPersonas(){
         ListadoUsuarios listadoUsuarios = new ListadoUsuarios();
-        listadoUsuarios.setUsuarios(usuarioRepository.findAll());
+        listadoUsuarios.setUsuarios(
+                usuarioRepository.findAll()
+                    .stream()
+                    .map(Usuario::crearDT)
+                    .collect(Collectors.toList()));
         return listadoUsuarios;
     }
 

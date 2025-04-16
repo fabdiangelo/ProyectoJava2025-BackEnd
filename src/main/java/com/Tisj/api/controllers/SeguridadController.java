@@ -1,6 +1,6 @@
 package com.Tisj.api.controllers;
 
-import com.Tisj.bussines.entities.DT.DTUsuario;
+import com.Tisj.api.response.TokenUsuario;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.security.SeguridadService;
 import io.jsonwebtoken.Jwts;
@@ -32,16 +32,16 @@ public class SeguridadController {
 
     @PostMapping("/autenticacion")
     @Transactional(readOnly = true)
-    public ResponseEntity<DTUsuario> autenticarUsuario(
-            @RequestParam("usuario") String usuario,
+    public ResponseEntity<TokenUsuario> autenticarUsuario(
+            @RequestParam("email") String email,
             @RequestParam("password") String password
     ) {
         Usuario objUsuario = seguridadService
-                .autenticarUsuario(usuario, password)
+                .autenticarUsuario(email, password)
                 .orElseThrow(() -> new RuntimeException("Usuario o password incorrecto."));
         String token = generarToken(objUsuario);
-        DTUsuario usuarioResponse
-                = new DTUsuario(objUsuario.getNombre(),
+        TokenUsuario usuarioResponse
+                = new TokenUsuario(objUsuario.getNombre(), objUsuario.getEmail(),
                         token, seguridadService.listarRolesPorUsuario(objUsuario));
         return new ResponseEntity<>(usuarioResponse, HttpStatus.OK);
     }
