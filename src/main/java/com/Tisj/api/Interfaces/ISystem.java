@@ -8,14 +8,14 @@ import java.util.List;
 public interface ISystem {
 
 
-    Usuario RegistrarUsuario();
+//    Usuario RegistrarUsuario();
     void ModificarUsuario();
     void EliminarUsuario();
     void ModificarCurso();
     void EliminarCurso();
     void ModificarPaquete();
     void EliminarPaquete();
-    List<Usuario> ListarUsuario();
+//    List<Usuario> ListarUsuario();
     Pago CrearPago();
     System crearSystem();
     Carrito crearCarrito();
