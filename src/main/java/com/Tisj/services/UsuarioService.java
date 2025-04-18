@@ -9,6 +9,7 @@ import com.Tisj.bussines.repositories.RolUsuarioRepository;
 import com.Tisj.bussines.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,11 +75,15 @@ public class UsuarioService {
         return response;
     }
 
+    @Transactional
     public String eliminarUsuario(String email) {
         String response = null;
-        if(email != null && usuarioRepository.findById(email).isPresent()){
-            usuarioRepository.deleteByEmail(email);
-            response = "Cliente eliminado: " + email;
+        if(email != null){
+            Optional<Usuario> user = usuarioRepository.findById(email);
+            if(user.isPresent() && user.get().getRoles().stream().noneMatch(rolUsuario -> rolUsuario.getNombre().equals("ADMIN"))){
+                usuarioRepository.deleteByEmail(email);
+                response = "Cliente eliminado: " + email;
+            }
         }
         return response;
     }
