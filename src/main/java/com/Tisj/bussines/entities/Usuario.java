@@ -33,7 +33,13 @@ public class Usuario {
             inverseJoinColumns = @JoinColumn(name = "ID_ROL"))
     @ToString.Exclude
     private List<RolUsuario> roles;
-//    private List<Articulo> articulos;
+
+    @OneToMany
+    @JoinColumn(name = "articulo_cliente_id")
+    private List<ArticuloCliente> articulos;
+
+    @OneToMany (mappedBy = "usuario")
+    private List<Pago> pagos;
 
     public Void modificarContrasena(){
         return null;

@@ -3,29 +3,39 @@ package com.Tisj.bussines.entities;
 import com.Tisj.bussines.entities.DT.DTFactura;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Data
 @Entity
-@Table(name = "pago")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Pago {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private Usuario cliente;
+    private Usuario usuario;
 
     private LocalDate fechaPago;
     private Float monto;
 
+    public Pago (Usuario usuario, Float monto){
+        this.usuario = usuario;
+        this.fechaPago = LocalDate.now();
+        this.monto = monto;
+    }
+
     public DTFactura realizarFacturacion(){
         return new DTFactura(
                 this.id,
-                cliente.getNombre(),
-                cliente.getEmail(),
+                usuario.getNombre(),
+                usuario.getEmail(),
                 this.fechaPago,
                 this.monto
         );
