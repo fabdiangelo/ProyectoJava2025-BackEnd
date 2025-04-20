@@ -5,6 +5,7 @@ import com.Tisj.api.response.ListadoUsuarios;
 import com.Tisj.bussines.entities.DT.DTUsuario;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.services.UsuarioService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -18,6 +19,7 @@ import java.lang.System;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
