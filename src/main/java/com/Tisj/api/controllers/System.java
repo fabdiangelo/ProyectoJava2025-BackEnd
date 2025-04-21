@@ -56,10 +56,6 @@ public class System implements ISystem {
 
     }
 
-//    @Override
-//    public List<Usuario> ListarUsuario() {
-//        return List.of();
-//    }
 
     @Override
     public Pago CrearPago() {
