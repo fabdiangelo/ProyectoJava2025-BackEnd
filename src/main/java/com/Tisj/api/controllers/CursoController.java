@@ -13,8 +13,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/cursos")
-@PreAuthorize("hasAuthority('ADMIN')")
+@RequestMapping("/api/curso")
 public class CursoController {
 
     @Autowired
