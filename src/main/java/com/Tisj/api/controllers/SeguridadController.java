@@ -55,7 +55,7 @@ public class SeguridadController {
         String token = Jwts
                 .builder()
                 .setId("@acchsjwt") // Dinámico desde BD
-                .setSubject(usuario.getNombre())
+                .setSubject(usuario.getEmail())
                 .claim("authorities",
                         grantedAuthorityList.stream()
                                 .map(GrantedAuthority::getAuthority)

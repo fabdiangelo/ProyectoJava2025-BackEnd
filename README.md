@@ -47,3 +47,7 @@
   - PayPal Developer API
   - Mercado Pago Developer API.
 - **Videos:** Youtube Developer API.
+
+
+# TO DO:
+verificar que el usuario que 

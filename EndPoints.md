@@ -1,24 +1,40 @@
 # Plan Básico de Endpoints 22/04/2025 solo pruebas con endpoints.
-
-- `200 OK` La operación se realizó con éxito.
-- `201 CREATED` Se creó un nuevo elemento con éxito.
-- `403 Forbidden` Fallo de autentificación (Admin).
-- `403 Forbidden` Fallo de autentificación (User).
-- `404 OK` No se encontró el elemento correspondiente
+- Ejemplos:
+  - `200 OK` La operación se realizó con éxito.
+  - `201 CREATED` Se creó un nuevo elemento con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 OK` No se encontró el elemento correspondiente
 
 
 ### Usuario-Controller `/api/usuarios`
-- `POST /api/usuarios` Crear un nuevo usuario.
-  - `403 Forbidden`
-- `GET /api/usuarios` Obtener una lista de todos los usuarios (puede requerir permisos de admin).
-  - `200 OK` response status is 200
-- `GET /api/usuarios/{email}` - Obtener detalles de un usuario específico por ID.  
-  Resultado: Error: 404 en caso de un usuario no existente.
-  Resultado A: 200 en caso de un usuario existente.
-- `PUT /api/usuarios/{id}` - Actualizar la información de un usuario existente.  
-  Resultado: Error: 403 response status is 403 Forbidden
-- `DELETE /api/usuarios/{id}` - Eliminar un usuario (puede ser borrado lógico).  
-  Resultado: 400 response status is 400 Bad Request
+- `POST /api/usuarios` *GUEST*
+  - `201 CREATED` Se creó un nuevo usuario con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+
+
+- `GET /api/usuarios` *ADMIN*
+    - `200 OK` Se listan todos los usuario.
+    - `400 BAD REQUEST` No existen usuarios que listar.
+    - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/usuarios/{email}` *USER/ADMIN*
+  - `200 OK` Se muestran los datos del usuario.
+  - `400 BAD REQUEST` No existen datos que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `PUT /api/usuarios/{id}` *USER/ADMIN*  
+  - `200 OK` Se actualizan los datos del usuario.
+  - `400 BAD REQUEST` No existe el usuario / El body tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `DELETE /api/usuarios/{id}` *USER/ADMIN*
+  - `200 OK` Se eliminan los datos del usuario.
+  - `400 BAD REQUEST` No existe el usuario.
+  - `403 FORBIDDEN` Fallo de autorización.
 
 
 **Pruebas Video-Controller (Escenario: No existe ningún video previamente)**

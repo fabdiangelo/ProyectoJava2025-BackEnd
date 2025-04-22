@@ -8,16 +8,11 @@ import com.Tisj.services.UsuarioService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.System;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -27,6 +22,16 @@ public class UsuarioController {
 
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
+    }
+
+    @PostMapping()
+    public ResponseEntity<String> createUser(@RequestBody Usuario user){
+        String response = usuarioService.crearCliente(user);
+        if(response == null){
+            return new ResponseEntity<>("Error al crear el usuario", HttpStatus.BAD_REQUEST);
+        }else{
+            return  new ResponseEntity<>(response, HttpStatus.CREATED);
+        }
     }
 
     @GetMapping
@@ -46,7 +51,11 @@ public class UsuarioController {
     @GetMapping("/{email}")
     public ResponseEntity<DTUsuario> getUsuario(@PathVariable(name = "email") String email) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
+        if ( ( auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("USER"))
+                && auth.getName().equals(email) )
+                ||
+                auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))
         ) {
             DTUsuario response = usuarioService.getUsuario(email);
@@ -57,28 +66,15 @@ public class UsuarioController {
         }
     }
 
-    @PostMapping()
-    public ResponseEntity<String> createUser(@RequestBody Usuario user){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
-        ) {
-            String response = usuarioService.crearCliente(user);
-            if(response == null){
-                return new ResponseEntity<>("Error al crear el usuario", HttpStatus.BAD_REQUEST);
-            }else{
-                return  new ResponseEntity<>(response, HttpStatus.CREATED);
-            }
-        }else{
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
-        }
-    }
-
     @PutMapping()
     public ResponseEntity<String> updateUser(@RequestBody ModificableUsuario user){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
+        if ( ( auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("USER"))
+                && auth.getName().equals(user.getEmail()) )
+                ||
+                auth.getAuthorities().stream()
+                        .anyMatch(p -> p.getAuthority().equals("ADMIN"))
         ) {
             String response = usuarioService.actualizarUsuario(user);
             if(response == null){
