@@ -44,7 +44,9 @@ Backend
 Testing
 	Swagger
 
-### Plan Básico de Endpoints
+
+
+### Plan Básico de Endpoints 22/04/2025 solo pruebas con endpoints.
 
 **Usuario-Controller (`/api/usuarios`)**
 - `POST /api/usuarios` - Crear un nuevo usuario.  
