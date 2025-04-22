@@ -1,49 +1,41 @@
 package com.Tisj.api.controllers;
 
-//import com.Tisj.services.EmailService;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//@Slf4j
-//@RestController
-//@RequestMapping("/api/email")
+import com.Tisj.services.YoutubeService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
+@Slf4j
+@RestController
+@RequestMapping("/api/youtube")
 public class YoutubeController {
 
+    @Autowired
+    private YoutubeService youtubeService;
 
-//
-//    @Slf4j
-//    @RestController
-//    @RequestMapping("/api/email")
-//    public class EmailController {
-//
-//        @Autowired
-//        private EmailService emailService;
-//
-//        @GetMapping("prueba/string")
-//        public ResponseEntity<String> enviarMail(@RequestParam("destinatario") String destinatario,
-//                                                 @RequestParam("asunto") String asunto) {
-//            try {
-//                emailService.enviarCorreo(destinatario, asunto, "Probando", false);
-//            }catch (Exception e){
-//                //log.error("Error: ", e);
-//            }
-//            return ResponseEntity.ok("Correo enviado");
-//        }
-//
-//        @GetMapping("prueba/html")
-//        public ResponseEntity<String> enviarMail(@RequestParam("destinatario") String destinatario) {
-//            try {
-//                emailService.notiCompra(destinatario);
-//            } catch (Exception e) {
-//                //log.error("Error: ", e);
-//            }
-//            return ResponseEntity.ok("Correo enviado");
-//        }
-//    }
+    @GetMapping("/video/{videoId}")
+    public ResponseEntity<Void> getVideoInfo(@PathVariable String videoId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping("/channel/{channelId}")
+    public ResponseEntity<Void> getChannelInfo(@PathVariable String channelId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
 }
