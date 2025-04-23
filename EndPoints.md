@@ -97,9 +97,7 @@
 
 
 - `PUT /api/paquetes/{id}` *ADMIN*
-  - `200 OK` Se actualizan los datos del paquete.
-  - `400 BAD REQUEST` No existe el paquete / El body tiene un formato incorrecto.
-  - `403 FORBIDDEN` Fallo de autorización.
+  - Se modifica su contenido en `PUT /api/articulos/{id}`
 
 
 - `DELETE /api/paquetes/{id}` *ADMIN*
@@ -107,109 +105,192 @@
   - `400 BAD REQUEST` No existe el paquete.
   - `403 FORBIDDEN` Fallo de autorización.
 
-
-***
-
-
-### Curso-Controller `/api/cursos`
-- `POST /api/cursos` - Crear un nuevo curso.
-  Resultado: response status is 403
-
-- `GET /api/cursos` - Obtener una lista de todos los cursos.  
-  Resultado: 200 OK response status is 200
-- `GET /api/cursos/{id}` - Obtener detalles de un curso específico por ID.  
-  Resultado: 404 response status is 404
-- `PUT /api/cursos/{id}` - Actualizar la información de un curso existente.  
-  Resultado: 403 response status is 403
-
 //Necesita logica de negocio
 - `POST /api/paquetes/{paqueteId}/cursos/{cursoId}` - Asociar un curso a un paquete.  
   Resultado: 403 response status is 403
 - `DELETE /api/paquetes/{paqueteId}/cursos/{cursoId}` - Desasociar un curso de un paquete.  
   Resultado: 204 No Content response status is 204
+- `GET /api/paquetes/{paqueteId}/cursos` - Listar cursos de un paquete
+***
 
 
-**Pago-Controller (`/api/pagos`)**
-- `POST /api/pagos` - Iniciar un proceso de pago (puede devolver URL de redirección a Paypal/MercadoPago).  
-  Resultado: 403 Forbidden response status is 403
-- `GET /api/pagos` - Obtener historial de pagos (probablemente filtrado por usuario o admin).  
-  Resultado: 200 OK response status is 200
-- `GET /api/pagos/{id}` - Obtener detalles de un pago específico.  
-  Resultado: Forbidden response status is 403
-
-  //Logica De negocios necesaria
-- `POST /api/pagos/paypal/webhook` - Endpoint para recibir notificaciones de estado de Paypal.  
-  Resultado:
-- `POST /api/pagos/mercadopago/webhook` - Endpoint para recibir notificaciones de estado de MercadoPago.  
-  Resultado:
-- `GET /api/usuarios/{userId}/pagos` - Obtener los pagos de un usuario específico.  
-  Resultado:
-
-**Oferta-Controller (`/api/ofertas`)**
-- `POST /api/ofertas` - Crear una nueva oferta.  
-  Resultado: 403 Forbidden response status is 403
-- `GET /api/ofertas` - Obtener una lista de todas las ofertas activas.  
-  Resultado: 202 response status is 202
-- `GET /api/ofertas/{id}` - Obtener detalles de una oferta específica por ID.  
-  Resultado: 404 response status is 404
-- `PUT /api/ofertas/{id}` - Actualizar una oferta existente.  
-  Resultado: 403 response status is 403
-- `DELETE /api/ofertas/{id}` - Eliminar/desactivar una oferta.  
-  Resultado: 204  response status is 204
-- `GET /api/ofertas/me` - Obtener los pagos de una oferta específica.  
-  Resultado: 200 OK response status is 200
+### Curso-Controller `/api/cursos`
+- `POST /api/cursos` *ADMIN*
+  - `201 CREATED` Se creó un nuevo curso con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
 
 
-**Curso-Controller (`/api/curso`)**
-- `POST /api/curso` - Crear un nuevo curso.  
-  Resultado: 403 Forbidden response status is 403
+- `GET /api/cursos` *USER*
+  - `200 OK` Se listan todos los cursos.
+  - `400 BAD REQUEST` No existen cursos que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
 
-- `GET /api/curso` - Obtener una lista de todos los cursos.  
-  Resultado: 200 OK response status is 200
 
-- `GET /api/curso/{id}` - Obtener detalles de un curso específico por ID.  
-  Resultado: 404 response status is 404
+- `GET /api/cursos/{id}` *USER*
+  - `200 OK` Se muestran los datos del curso.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un curso con esa id.
 
-- `PUT /api/curso/{id}` - Actualizar la información de un curso existente.  
-  Resultado: 404 response status is 404
 
-- `DELETE /api/curso/{id}` - Eliminar un curso.  
-  Resultado: 204 response status is 204
+- `PUT /api/cursos/{id}` *ADMIN*
+  - Se modifica su contenido en `PUT /api/articulos/{id}`
+
+
+- `DELETE /api/cursos/{id}` *ADMIN*
+  - `200 OK` Se elimina el curso.
+  - `400 BAD REQUEST` No existe el curso.
+  - `403 FORBIDDEN` Fallo de autorización.
+
 
 //Necesario implementar los siguientes endpoints:
+
+
 - `GET /api/curso/{cursoId}/videos` - Obtener los videos asociados a un curso.  
   Resultado:
 - `POST /api/curso/{cursoId}/videos/{videoId}` - Asociar un video a un curso.  
   Resultado:
 
 
-**Articulo-Controller (`/api/articulos`)**
-- `POST /api/articulos` - Crear un nuevo artículo.  
-  Resultado: response status is 403 Forbidden
-- `GET /api/articulos` - Obtener una lista de todos los artículos.  
-  Resultado:  200 OK response status is 200
-- `GET /api/articulos/{id}` - Obtener detalles de un artículo específico por ID.  
-  Resultado: 404 response status is 404
-- `PUT /api/articulos/{id}` - Actualizar un artículo existente.  
-  Resultado: Error: response status is 403
-- `DELETE /api/articulos/{id}` - Eliminar un artículo.  
-  Resultado: 204 response status is 204
+***
 
-**Articulo-Cliente-Controller (`/api/usuarios/{userId}/articulos`)**
-//Hacer pruebas en usuario antes
-- `GET /api/usuarios/{userId}/articulos` - Obtener los artículos asociados/comprados por un cliente/usuario.  
-  Resultado:
-- `POST /api/usuarios/{userId}/articulos/{articuloId}` - Asociar un artículo a un cliente (ej. después de una compra o suscripción).  
-  Resultado:
-- `DELETE /api/usuarios/{userId}/articulos/{articuloId}` - Desasociar un artículo de un cliente.  
-  Resultado:
 
-// Preguntar a Fabricio antes de realizar pruebas
-**Seguridad-Controller (`/api/auth`)**
-- `POST /api/auth/login` - Autenticar un usuario y devolver un token (JWT).  
+### Pago-Controller `/api/pagos`
+- `POST /api/pagos` *USER*
+  - `201 CREATED` Se creó un nuevo pago con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/pagos` *ADMIN*
+  - `200 OK` Se listan todos los pagos.
+  - `400 BAD REQUEST` No existen pagos que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/pagos/{id}` *USER*
+  - `200 OK` Se muestran los datos del pago.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un pago con ese id.
+
+
+//Logica De negocios necesaria
+ 
+
+- `POST /api/pagos/paypal/webhook` - Endpoint para recibir notificaciones de estado de Paypal.  
   Resultado:
-- `POST /api/auth/register` - Registrar un nuevo usuario (puede ser redundante con `POST /api/usuarios`).  
+- `POST /api/pagos/mercadopago/webhook` - Endpoint para recibir notificaciones de estado de MercadoPago.  
   Resultado:
+- `GET /api/usuarios/{userId}/pagos` - Obtener los pagos de un usuario específico.  
+
+
+***
+
+
+### Oferta-Controller `/api/ofertas`
+- `POST /api/ofertas` *ADMIN*
+  - `201 CREATED` Se creó una nueva oferta con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/ofertas` *USER*
+  - `200 OK` Se listan todas las ofertas.
+  - `400 BAD REQUEST` No existen ofertas que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/ofertas/{id}` *USER*
+  - `200 OK` Se muestran los datos de la oferta.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe una oferta con ese id.
+
+
+- `PUT /api/ofertas/{id}` *ADMIN*
+  - `200 OK` Se actualizan los datos de la oferta.
+  - `400 BAD REQUEST` No existe la oferta / El body tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `DELETE /api/ofertas/{id}` *ADMIN*
+  - `200 OK` Se elimina la oferta.
+  - `400 BAD REQUEST` No existe la oferta.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+// Logica de negocio faltante
+- `GET /api/ofertas/me` - Obtener los pagos de una oferta específica.  
+  Resultado: 200 OK response status is 200
+
+
+***
+
+
+### Articulo-Controller `/api/articulos`
+- `PUT /api/articulos/{id}` *ADMIN*
+  - `200 OK` Se actualizan los datos del artículo (paquete/curso).
+  - `400 BAD REQUEST` No existe el paquete / El body tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+***
+
+
+### Articulo-Cliente-Controller `/api/curso-cliente/{email}/articulo/{id}`
+- `POST /api/curso-cliente/{email}/articulo/{id}` *USER*
+  - `201 CREATED` Se creó una nueva relación entre usuario y artículo.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/curso-cliente/{email}/articulo/{id}` *USER*
+  - `200 OK` Se muestran los datos de la relación entre usuario y artículo.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe la relación.
+  
+
+- `GET /api/curso-cliente` *ADMIN*
+  - `200 OK` Se listan todas las relaciónes.
+  - `400 BAD REQUEST` No existen relaciones que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/curso-cliente/curso/{id}` *ADMIN*
+  - `200 OK` Se listan todos las relaciones con un curso dado.
+  - `400 BAD REQUEST` No existen relaciones que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/curso-cliente/usuario/{email}` *ADMIN*
+  - `200 OK` Se listan todos las relaciones de un usuario.
+  - `400 BAD REQUEST` No existen relaciones que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+- `PUT /api/curso-cliente/{email}/articulo/{id}` *USER*
+  - `200 OK` Se actualizan los datos de la relación.
+  - `400 BAD REQUEST` No existe la relación / El body tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `DELETE /api/curso-cliente/{email}/articulo/{id}` *USER*
+  - `200 OK` Se elimina la relación.
+  - `400 BAD REQUEST` No existe la relación.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+***
+
+
+### Seguridad-Controller (`/api/auth`)**
+- `POST /api/auth` *GUEST*
+  - `200 OK` Se crea un token.
+  - `400 BAD REQUEST` No existe un usuario con ese email.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+// Falta desarrollar
+
+
 - `POST /api/auth/refresh-token` - Refrescar un token de acceso expirado usando un token de refresco.  
   Resultado:
 - `GET /api/auth/me` - Obtener información del usuario autenticado actualmente.  
