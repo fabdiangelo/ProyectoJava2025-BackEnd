@@ -3,7 +3,6 @@ package com.Tisj.api.controllers;
 import com.Tisj.api.requests.RequestUsuario;
 import com.Tisj.api.response.ListadoUsuarios;
 import com.Tisj.bussines.entities.DT.DTUsuario;
-import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.services.UsuarioService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -21,70 +21,47 @@ public class ArticuloController {
     private ArticuloService articuloService;
 
     @GetMapping
-    public ResponseEntity<List<Articulo>> getArticulos() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<List<Articulo>> getAllArticulos() {
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            List<Articulo> articulos = articuloService.getAllArticulos();
-            return new ResponseEntity<>(articulos, HttpStatus.OK);
+        List<Articulo> articulos = articuloService.getAllArticulos();
+        return new ResponseEntity<>(articulos, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Articulo> getArticulo(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            Articulo articulo = articuloService.getArticuloById(id);
-            if (articulo != null) {
-                return new ResponseEntity<>(articulo, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+    public ResponseEntity<Articulo> getArticuloById(@PathVariable Long id) {
+        Articulo articulo = articuloService.getArticuloById(id);
+        if (articulo != null) {
+            return new ResponseEntity<>(articulo, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping
     public ResponseEntity<Articulo> createArticulo(@RequestBody Articulo articulo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            Articulo nuevoArticulo = articuloService.createArticulo(articulo);
-            return new ResponseEntity<>(nuevoArticulo, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        Articulo nuevoArticulo = articuloService.createArticulo(articulo);
+        return new ResponseEntity<>(nuevoArticulo, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Articulo> updateArticulo(@PathVariable Long id, @RequestBody Articulo articulo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            Articulo articuloActualizado = articuloService.updateArticulo(id, articulo);
-            if (articuloActualizado != null) {
-                return new ResponseEntity<>(articuloActualizado, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+        Articulo articuloActualizado = articuloService.updateArticulo(id, articulo);
+        if (articuloActualizado != null) {
+            return new ResponseEntity<>(articuloActualizado, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArticulo(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            articuloService.deleteArticulo(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        articuloService.deleteArticulo(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
