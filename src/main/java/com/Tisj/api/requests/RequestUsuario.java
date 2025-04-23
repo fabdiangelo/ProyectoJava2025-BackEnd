@@ -7,11 +7,12 @@ import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
-public class ModificableUsuario {
+public class RequestUsuario {
     private String email;
     private String password;
     private String nombre;
     private String apellido;
     private char genero;
     private LocalDate nacimiento;
+    private Boolean activo;
 }

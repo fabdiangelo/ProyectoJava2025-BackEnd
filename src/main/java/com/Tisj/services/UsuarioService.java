@@ -1,6 +1,6 @@
 package com.Tisj.services;
 
-import com.Tisj.api.requests.ModificableUsuario;
+import com.Tisj.api.requests.RequestUsuario;
 import com.Tisj.api.response.ListadoUsuarios;
 import com.Tisj.bussines.entities.DT.DTUsuario;
 import com.Tisj.bussines.entities.RolUsuario;
@@ -8,6 +8,7 @@ import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.bussines.repositories.RolUsuarioRepository;
 import com.Tisj.bussines.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public final UsuarioRepository usuarioRepository;
     public final RolUsuarioRepository rolUsuarioRepository;
@@ -37,11 +40,14 @@ public class UsuarioService {
         return listadoUsuarios;
     }
 
-    public String crearCliente(Usuario user){
+    public String crearCliente(RequestUsuario requestUsuario){
+        Usuario user = requestUsuarioToUsuario(requestUsuario);
         String response = null;
         if(user != null && usuarioRepository.findById(user.getEmail()).isEmpty()){
             Optional<RolUsuario> rol = rolUsuarioRepository.findByNombre("USER");
             if(rol.isPresent()){
+                String encodedPassword = passwordEncoder.encode(user.getPassword());
+                user.setPassword(encodedPassword);
                 agregarRolUsuario(user, rol.get());
                 response = "Cliente creado: " + usuarioRepository.save(user).getEmail();
             }
@@ -61,15 +67,16 @@ public class UsuarioService {
         return user.map(Usuario::crearDT).orElse(null);
     }
 
-    public String actualizarUsuario(ModificableUsuario changes) {
+    public String actualizarUsuario(RequestUsuario changes) {
         String response = null;
         Usuario user = usuarioRepository.findById(changes.getEmail()).orElse(null);
         if(user != null && changes != null){
+            user.setPassword(changes.getPassword());
             user.setNombre(changes.getNombre());
             user.setApellido(changes.getApellido());
-            user.setPassword(changes.getPassword());
-            user.setNacimiento(changes.getNacimiento());
             user.setGenero(changes.getGenero());
+            user.setNacimiento(changes.getNacimiento());
+            user.setActivo(changes.getActivo());
             response = "Cliente modificado: " + usuarioRepository.save(user).getEmail();
         }
         return response;
@@ -80,12 +87,25 @@ public class UsuarioService {
         String response = null;
         if(email != null){
             Optional<Usuario> user = usuarioRepository.findById(email);
-            if(user.isPresent() && user.get().getRoles().stream().noneMatch(rolUsuario -> rolUsuario.getNombre().equals("ADMIN"))){
-                usuarioRepository.deleteByEmail(email);
-                response = "Cliente eliminado: " + email;
+            if(user.isPresent()){
+                user.get().setActivo(false);
+                //usuarioRepository.deleteByEmail(email);
+                response = "Cliente eliminado: " + usuarioRepository.save(user.get()).getEmail();
             }
         }
         return response;
+    }
+
+    public Usuario requestUsuarioToUsuario(RequestUsuario req){
+        return new Usuario(
+                req.getEmail(),
+                req.getPassword(),
+                req.getNombre(),
+                req.getApellido(),
+                req.getGenero(),
+                req.getNacimiento(),
+                req.getActivo()
+        );
     }
 }
 

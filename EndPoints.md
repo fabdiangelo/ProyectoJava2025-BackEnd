@@ -4,7 +4,10 @@
   - `201 CREATED` Se creó un nuevo elemento con éxito.
   - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
   - `403 FORBIDDEN` Fallo de autorización.
-  - `404 OK` No se encontró el elemento correspondiente
+  - `404 NOT FOUND` No se encontró el elemento correspondiente
+
+
+***
 
 
 ### Usuario-Controller `/api/usuarios`
@@ -21,58 +24,94 @@
 
 - `GET /api/usuarios/{email}` *USER/ADMIN*
   - `200 OK` Se muestran los datos del usuario.
-  - `400 BAD REQUEST` No existen datos que listar.
+  - `400 BAD REQUEST` No existe un usuario con ese email.
   - `403 FORBIDDEN` Fallo de autorización.
 
 
-- `PUT /api/usuarios/{id}` *USER/ADMIN*  
+- `PUT /api/usuarios/{email}` *USER/ADMIN*  
   - `200 OK` Se actualizan los datos del usuario.
-  - `400 BAD REQUEST` No existe el usuario / El body tiene un formato incorrecto.
   - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el usuario / El body tiene un formato incorrecto.
 
 
 - `DELETE /api/usuarios/{id}` *USER/ADMIN*
-  - `200 OK` Se eliminan los datos del usuario.
+  - `200 OK` El estado del usuario pasa a ser inactivo (false).
   - `400 BAD REQUEST` No existe el usuario.
   - `403 FORBIDDEN` Fallo de autorización.
 
-
-**Pruebas Video-Controller (Escenario: No existe ningún video previamente)**
-
-Sin videos previamente creados
-**Video-Controller (`/api/videos`)**
-*(Resultados de pruebas pendientes)*
-- `GET /api/videos` - Obtener una lista de todos los videos.
-- Resultado: 200  OK response status is 200
-- `GET /api/videos/{id}` - Obtener detalles de un video específico por ID.
-- Resultado: 404 response status is 404
-- `PUT /api/videos/{id}` - Actualizar la información de un video existente.
-- Resultado: 404 response status is 404
-- `DELETE /api/videos/{id}` - Eliminar un video.
-- Resultado: 204 response status is 204 No Content
-- `POST /api/videos` - Subir/registrar un nuevo video.
-- Resultado: 201 response status is 201 created
-
-//Los endpoint funcionan aun no esta vinculados a la logica de negocio asi que no crea el Video
+  
+***
 
 
+### Video-Controller `/api/videos`
+- `POST /api/videos` *ADMIN*
+  - `201 CREATED` Se creó un nuevo video con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
 
 
-**Paquete-Controller (`/api/paquetes`)**
-- `POST /api/paquetes` - Crear un nuevo paquete (de cursos, artículos, etc.).  
-  Resultado: 403 response status is 403 Forbidden
-- `GET /api/paquetes` - Obtener una lista de todos los paquetes.  
-  Resultado: 200 OK response status is 200
-- `GET /api/paquetes/{id}` - Obtener detalles de un paquete específico por ID.  
-  Resultado: 404 response status is 404
-- `PUT /api/paquetes/{id}` - Actualizar la información de un paquete existente.  
-  Resultado: 403 response status is 403 Forbidden
-- `DELETE /api/paquetes/{id}` - Eliminar un paquete.  
-  Resultado: 204 response status is 204 No Content
+- `GET /api/videos` *ADMIN*
+  - `200 OK` Se listan todos los videos.
+  - `400 BAD REQUEST` No existen videos que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
 
 
+- `GET /api/videos/{id}` *USER*
+  - `200 OK` Se muestran los datos del video.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un video con esa id.
 
-**Curso-Controller (`/api/cursos`)**
+
+- `PUT /api/videos/{id}` *ADMIN*
+  - `200 OK` Se actualizan los datos del video.
+  - `400 BAD REQUEST` No existe el video / El body tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `DELETE /api/videos/{id}` *ADMIN*
+  - `200 OK` Se elimina el video.
+  - `400 BAD REQUEST` No existe el video.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+***
+
+
+### Paquete-Controller `/api/paquetes`
+- `POST /api/paquetes` *ADMIN*
+  - `201 CREATED` Se creó un nuevo paquete con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/paquetes` *USER*
+  - `200 OK` Se listan todos los paquetes.
+  - `400 BAD REQUEST` No existen paquetes que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/paquetes/{id}` *USER*
+  - `200 OK` Se muestran los datos del paquete.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un paquete con esa id.
+
+
+- `PUT /api/paquetes/{id}` *ADMIN*
+  - `200 OK` Se actualizan los datos del paquete.
+  - `400 BAD REQUEST` No existe el paquete / El body tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `DELETE /api/paquetes/{id}` *ADMIN*
+  - `200 OK` Se elimina el paquete.
+  - `400 BAD REQUEST` No existe el paquete.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+***
+
+
+### Curso-Controller `/api/cursos`
 - `POST /api/cursos` - Crear un nuevo curso.
   Resultado: response status is 403
 

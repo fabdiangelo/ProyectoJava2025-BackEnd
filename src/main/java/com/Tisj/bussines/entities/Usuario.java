@@ -6,15 +6,14 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "usuario")
 public class Usuario {
 
     @Id
@@ -24,7 +23,6 @@ public class Usuario {
     private String apellido;
     private char genero;
     private LocalDate nacimiento;
-    private String emailRecuperacion;
     private Boolean activo;
 
     @ManyToMany (fetch = FetchType.EAGER)
@@ -41,11 +39,18 @@ public class Usuario {
     @OneToMany (mappedBy = "usuario")
     private List<Pago> pagos;
 
-    public Void modificarContrasena(){
-        return null;
-    }
-    public Void recuperarCuenta(String email){
-        return null;
+    public Usuario(String email, String password, String nombre, String apellido, char genero, LocalDate nacimiento, Boolean activo){
+        this.email = email;
+        this.password = password;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.genero = genero;
+        this.nacimiento = nacimiento;
+        this.activo = activo;
+
+        this.roles = new ArrayList<>();
+        this.articulos = new ArrayList<>();
+        this.pagos = new ArrayList<>();
     }
 
     public DTUsuario crearDT(){
