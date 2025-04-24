@@ -79,6 +79,18 @@ public class PagoController {
         }
     }
 
+    @GetMapping("/usuario/{usuarioEmail}")
+    public ResponseEntity<List<Pago>> getPagosByUsuarioEmail(@PathVariable String usuarioEmail) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            List<Pago> pagos = pagoService.getPagosByUsuarioEmail(usuarioEmail);
+            return new ResponseEntity<>(pagos, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePago(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

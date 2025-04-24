@@ -1,6 +1,7 @@
 package com.Tisj.bussines.entities;
 
 import com.Tisj.bussines.entities.DT.DTFactura;
+import com.Tisj.api.response.TokenPago;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -39,5 +40,9 @@ public class Pago {
                 this.fechaPago,
                 this.monto
         );
+    }
+
+    public TokenPago generarTokenPago() {
+        return new TokenPago(this);
     }
 }

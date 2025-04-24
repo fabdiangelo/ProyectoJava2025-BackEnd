@@ -32,6 +32,10 @@ public class Carrito {
     @JoinColumn(name = "pago_id")
     private Pago pago;
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
     public Carrito(){
         this.vencimiento = LocalDate.now().plusWeeks(1);
         this.items = new ArrayList<>();

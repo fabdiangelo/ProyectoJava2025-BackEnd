@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/carritos")
+@RequestMapping("/api/carrito")
 public class CarritoController {
 
    @Autowired
@@ -53,17 +53,17 @@ public class CarritoController {
     }
    }
 
-   @PutMapping("/{id}")
-   public ResponseEntity<Carrito> updateCarrito(@PathVariable Long id, @RequestBody Carrito carrito) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth.getAuthorities().stream()
-            .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-       return buildResponse(carritoService.updateCarrito(id, carrito));
-    } else {
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-   }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<Carrito> updateCarrito(@PathVariable Long id, @RequestBody Carrito carrito) {
+//     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//     if (auth.getAuthorities().stream()
+//             .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+//        return buildResponse(carritoService.updateCarrito(id, carrito));
+//     } else {
+//         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//    }
        
-   }
+//    }
 
    @DeleteMapping("/{id}")
    public ResponseEntity<Void> deleteCarrito(@PathVariable Long id) {

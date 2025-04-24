@@ -28,4 +28,10 @@ public class Paquete extends Articulo{
         super(nombre, descripcion, precio, videoPresentacion);
         this.cursos = cursos;
     }
+
+
+    public Paquete orElseThrow(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
+    }
 }
