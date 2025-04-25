@@ -9,10 +9,11 @@
   - `404 NOT FOUND` No se encontró el elemento correspondiente
 
 ## Índice
-- [Usuario](#usuario-controller-apiusuarios)
+- [-Usuario](#usuario-controller-apiusuarios)
 - [Video](#video-controller-apivideos)
 - [-Curso](#curso-controller-apicursos)
-- [Paquete](#paquete-controller-apipaquetes)
+- [-Paquete](#paquete-controller-apipaquetes)
+- [Carrito](#carrito-controller-apicarrito)
 - [Pago](#pago-controller-apipagos)
 - [Oferta](#oferta-controller-apiofertas)
 - [Articulo](#articulo-controller-apiarticulos)
@@ -64,8 +65,8 @@
 
 - `GET /api/videos` *ADMIN*
   - `200 OK` Se listan todos los videos.
-  - `400 BAD REQUEST` No existen videos que listar.
   - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existen videos que listar.
 
 
 - `GET /api/videos/{id}` *USER*
@@ -98,8 +99,8 @@
 
 - `GET /api/cursos` *USER*
   - `200 OK` Se listan todos los cursos.
-  - `400 BAD REQUEST` No existen cursos que listar.
   - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existen cursos que listar.
 
 
 - `GET /api/cursos/{id}` *USER*
@@ -123,7 +124,7 @@
 - `PUT /api/curso/{cursoId}/videos/{videoId}` *ADMIN*
   - `200 OK` Se agrega/elimina el video del curso.
   - `403 FORBIDDEN` Fallo de autorización.
-  - `404 NOT FOUND` No existe el curso / El video no existe.
+  - `404 NOT FOUND` No existe el curso / No existe el video.
 
 
 - `DELETE /api/cursos/{id}` *ADMIN*
@@ -136,7 +137,7 @@
 
 
 ### Paquete-Controller `/api/paquetes`
-- `POST /api/paquetes` *ADMIN*
+- `POST /api/paquetes` *ADMIN* **>RequestPaquete**
   - `201 CREATED` Se creó un nuevo paquete con éxito.
   - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
   - `403 FORBIDDEN` Fallo de autorización.
@@ -144,8 +145,8 @@
 
 - `GET /api/paquetes` *USER*
   - `200 OK` Se listan todos los paquetes.
-  - `400 BAD REQUEST` No existen paquetes que listar.
   - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existen paquetes que listar.
 
 
 - `GET /api/paquetes/{id}` *USER*
@@ -154,8 +155,22 @@
   - `404 NOT FOUND` No existe un paquete con esa id.
 
 
-- `PUT /api/paquetes/{id}` *ADMIN*
-  - Se modifica su contenido en `PUT /api/articulos/{id}`
+- `GET /api/paquetes/{id}/cursos` *USER*
+  - `200 OK` Se muestran los cursos del paquete.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un paquete con esa id.
+
+
+- `PUT /api/paquetes/{id}` *ADMIN* **>RequestPaquete**
+  - `200 OK` Se actualizan los datos del paquete.
+  - `400 BAD REQUEST` No existe el curso / El `RequestPaquete` tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `PUT /api/paquetes/{paqueteId}/cursos/{cursoId}` *ADMIN*
+  - `200 OK` Se agrega/elimina el curso del paquete.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el paquete / No existe el curso.
 
 
 - `DELETE /api/paquetes/{id}` *ADMIN*
@@ -163,13 +178,13 @@
   - `400 BAD REQUEST` No existe el paquete.
   - `403 FORBIDDEN` Fallo de autorización.
 
-//Necesita logica de negocio
-- `POST /api/paquetes/{paqueteId}/cursos/{cursoId}` - Asociar un curso a un paquete.  
-  Resultado: 403 response status is 403
-- `DELETE /api/paquetes/{paqueteId}/cursos/{cursoId}` - Desasociar un curso de un paquete.  
-  Resultado: 204 No Content response status is 204
-- `GET /api/paquetes/{paqueteId}/cursos` - Listar cursos de un paquete
 
+***
+
+
+### Carrito-Controller `/api/carrito`
+
+// TO DO
 
 
 ***
@@ -241,16 +256,6 @@
 // Logica de negocio faltante
 - `GET /api/ofertas/me` - Obtener los pagos de una oferta específica.  
   Resultado: 200 OK response status is 200
-
-
-***
-
-
-### Articulo-Controller `/api/articulos`
-- `PUT /api/articulos/{id}` *ADMIN*
-  - `200 OK` Se actualizan los datos del artículo (paquete/curso).
-  - `400 BAD REQUEST` No existe el paquete / El body tiene un formato incorrecto.
-  - `403 FORBIDDEN` Fallo de autorización.
 
 
 ***

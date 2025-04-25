@@ -4,7 +4,6 @@ import com.Tisj.api.requests.RequestCurso;
 import com.Tisj.bussines.entities.Curso;
 import com.Tisj.bussines.entities.Video;
 import com.Tisj.bussines.repositories.CursoRepository;
-import com.Tisj.bussines.repositories.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

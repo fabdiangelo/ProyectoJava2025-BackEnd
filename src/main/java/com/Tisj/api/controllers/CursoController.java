@@ -86,7 +86,6 @@ public class CursoController {
         }
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<Curso> updateCurso(@PathVariable Long id, @RequestBody RequestCurso reqCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
