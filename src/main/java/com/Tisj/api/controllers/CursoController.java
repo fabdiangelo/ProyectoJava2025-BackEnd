@@ -1,6 +1,8 @@
 package com.Tisj.api.controllers;
 
+import com.Tisj.api.requests.RequestCurso;
 import com.Tisj.bussines.entities.Curso;
+import com.Tisj.bussines.entities.Video;
 import com.Tisj.services.CursoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +22,33 @@ public class CursoController {
     @Autowired
     private CursoService cursoService;
 
-    @GetMapping
-    public ResponseEntity<List<Curso>> getCursos() {
-         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    @PostMapping
+    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso reqCurso) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        List<Curso> cursos = cursoService.getAllCursos();
-        return new ResponseEntity<>(cursos, HttpStatus.OK);
+
+            Curso curso = cursoService.createCurso(cursoService.reqToCurso(reqCurso));
+            if (curso == null){
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(curso, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Curso>> getCursos() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
+                        || p.getAuthority().equals("USER")))) {
+            List<Curso> cursos = cursoService.getAllCursos();
+            if (cursos.isEmpty()){
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(cursos, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -36,41 +58,60 @@ public class CursoController {
     public ResponseEntity<Curso> getCurso(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        Curso curso = cursoService.getCursoById(id);
-        if (curso != null) {
+                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
+                        || p.getAuthority().equals("USER")))) {
+            Curso curso = cursoService.getCursoById(id);
+            if (curso == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
             return new ResponseEntity<>(curso, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+    }
+
+    @GetMapping("/{id}/videos")
+    public ResponseEntity<List<Video>> getVideosCurso(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
+                        || p.getAuthority().equals("USER")))) {
+            List<Video> videos = cursoService.getVideosCursoById(id);
+            if (videos == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(videos, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Curso> createCurso(@RequestBody Curso curso) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        Curso nuevoCurso = cursoService.createCurso(curso);
-        return new ResponseEntity<>(nuevoCurso, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Curso> updateCurso(@PathVariable Long id, @RequestBody Curso curso) {
+    public ResponseEntity<Curso> updateCurso(@PathVariable Long id, @RequestBody RequestCurso reqCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        Curso cursoActualizado = cursoService.updateCurso(id, curso);
-        if (cursoActualizado != null) {
+            Curso cursoActualizado = cursoService.updateCurso(id, cursoService.reqToCurso(reqCurso));
+            if (cursoActualizado == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity<>(cursoActualizado, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+    }
+
+    @PutMapping("/{id}/videos/{videoId}")
+    public ResponseEntity<Curso> updateVideosCurso(@PathVariable Long id, @PathVariable Long videoId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            Curso cursoActualizado = cursoService.updateVideosCurso(id, videoId);
+            if (cursoActualizado == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(cursoActualizado, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -81,8 +122,10 @@ public class CursoController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        cursoService.deleteCurso(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            if(cursoService.deleteCurso(id)){
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);

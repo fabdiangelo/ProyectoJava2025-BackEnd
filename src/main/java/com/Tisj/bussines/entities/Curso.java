@@ -16,6 +16,8 @@ import java.util.List;
 public class Curso extends Articulo{
     private Integer duracionTotal;
     private String pdf;
+    private Integer edadObj;
+    private Character generoObj;
 
     @ManyToMany(mappedBy = "cursos")
     private List<Paquete> paquetes;
@@ -28,9 +30,11 @@ public class Curso extends Articulo{
     )
     private List<Video> videos;
 
-    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, String pdf, List<Video> videos){
+    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, Character generoObj, String pdf, List<Video> videos){
         super(nombre, descripcion, precio, videoPresentacion);
         this.duracionTotal = duracionTotal;
+        this.edadObj = edadObj;
+        this.generoObj = generoObj;
         this.pdf = pdf;
         this.paquetes = new ArrayList<>();
         this.videos = videos;

@@ -1,4 +1,6 @@
-# Plan Básico de Endpoints 22/04/2025 solo pruebas con endpoints.
+# Plan Básico de Endpoints
+###### 25/04/2025
+
 - Ejemplos:
   - `200 OK` La operación se realizó con éxito.
   - `201 CREATED` Se creó un nuevo elemento con éxito.
@@ -6,9 +8,19 @@
   - `403 FORBIDDEN` Fallo de autorización.
   - `404 NOT FOUND` No se encontró el elemento correspondiente
 
+## Índice
+- [Usuario](#usuario-controller-apiusuarios)
+- [Video](#video-controller-apivideos)
+- [-Curso](#curso-controller-apicursos)
+- [Paquete](#paquete-controller-apipaquetes)
+- [Pago](#pago-controller-apipagos)
+- [Oferta](#oferta-controller-apiofertas)
+- [Articulo](#articulo-controller-apiarticulos)
+- [Articulo - Cliente](#articulo-cliente-controller-apicurso-clienteemailarticuloid)
+- [Seguridad](#seguridad-controller-apiauth)
+
 
 ***
-
 
 ### Usuario-Controller `/api/usuarios`
 - `POST /api/usuarios` *GUEST*
@@ -18,23 +30,23 @@
 
 - `GET /api/usuarios` *ADMIN*
     - `200 OK` Se listan todos los usuario.
-    - `400 BAD REQUEST` No existen usuarios que listar.
     - `403 FORBIDDEN` Fallo de autorización.
+    - `404 NOT FOUND` No existen usuarios que listar.
 
 
 - `GET /api/usuarios/{email}` *USER/ADMIN*
   - `200 OK` Se muestran los datos del usuario.
-  - `400 BAD REQUEST` No existe un usuario con ese email.
   - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un usuario con ese email.
 
 
-- `PUT /api/usuarios/{email}` *USER/ADMIN*  
+- `PUT /api/usuarios` *USER/ADMIN* **>RequestUsuario**
   - `200 OK` Se actualizan los datos del usuario.
+  - `400 BAD REQUEST` No existe el usuario / El body tiene un formato incorrecto.
   - `403 FORBIDDEN` Fallo de autorización.
-  - `404 NOT FOUND` No existe el usuario / El body tiene un formato incorrecto.
 
 
-- `DELETE /api/usuarios/{id}` *USER/ADMIN*
+- `DELETE /api/usuarios/{email}` *USER/ADMIN*
   - `200 OK` El estado del usuario pasa a ser inactivo (false).
   - `400 BAD REQUEST` No existe el usuario.
   - `403 FORBIDDEN` Fallo de autorización.
@@ -77,6 +89,52 @@
 ***
 
 
+### Curso-Controller `/api/cursos`
+- `POST /api/cursos` *ADMIN* **>RequestCurso**
+  - `201 CREATED` Se creó un nuevo curso con éxito.
+  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/cursos` *USER*
+  - `200 OK` Se listan todos los cursos.
+  - `400 BAD REQUEST` No existen cursos que listar.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/cursos/{id}` *USER*
+  - `200 OK` Se muestran los datos del curso.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un curso con esa id.
+
+
+- `GET /api/cursos/{id}/videos` *USER*
+  - `200 OK` Se muestran los videos del curso.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe un curso con esa id.
+
+
+- `PUT /api/cursos/{id}` *ADMIN* **>RequestCurso**
+  - `200 OK` Se actualizan los datos del curso.
+  - `400 BAD REQUEST` No existe el curso / El `RequestCurso` tiene un formato incorrecto.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `PUT /api/curso/{cursoId}/videos/{videoId}` *ADMIN*
+  - `200 OK` Se agrega/elimina el video del curso.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el curso / El video no existe.
+
+
+- `DELETE /api/cursos/{id}` *ADMIN*
+  - `200 OK` Se elimina el curso.
+  - `400 BAD REQUEST` No existe el curso.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+***
+
+
 ### Paquete-Controller `/api/paquetes`
 - `POST /api/paquetes` *ADMIN*
   - `201 CREATED` Se creó un nuevo paquete con éxito.
@@ -111,45 +169,7 @@
 - `DELETE /api/paquetes/{paqueteId}/cursos/{cursoId}` - Desasociar un curso de un paquete.  
   Resultado: 204 No Content response status is 204
 - `GET /api/paquetes/{paqueteId}/cursos` - Listar cursos de un paquete
-***
 
-
-### Curso-Controller `/api/cursos`
-- `POST /api/cursos` *ADMIN*
-  - `201 CREATED` Se creó un nuevo curso con éxito.
-  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-- `GET /api/cursos` *USER*
-  - `200 OK` Se listan todos los cursos.
-  - `400 BAD REQUEST` No existen cursos que listar.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-- `GET /api/cursos/{id}` *USER*
-  - `200 OK` Se muestran los datos del curso.
-  - `403 FORBIDDEN` Fallo de autorización.
-  - `404 NOT FOUND` No existe un curso con esa id.
-
-
-- `PUT /api/cursos/{id}` *ADMIN*
-  - Se modifica su contenido en `PUT /api/articulos/{id}`
-
-
-- `DELETE /api/cursos/{id}` *ADMIN*
-  - `200 OK` Se elimina el curso.
-  - `400 BAD REQUEST` No existe el curso.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-//Necesario implementar los siguientes endpoints:
-
-
-- `GET /api/curso/{cursoId}/videos` - Obtener los videos asociados a un curso.  
-  Resultado:
-- `POST /api/curso/{cursoId}/videos/{videoId}` - Asociar un video a un curso.  
-  Resultado:
 
 
 ***

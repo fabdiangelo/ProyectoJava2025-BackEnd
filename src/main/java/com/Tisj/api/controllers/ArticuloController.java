@@ -20,47 +20,6 @@ public class ArticuloController {
     @Autowired
     private ArticuloService articuloService;
 
-    @GetMapping
-    public ResponseEntity<List<Articulo>> getAllArticulos() {
-          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        List<Articulo> articulos = articuloService.getAllArticulos();
-        return new ResponseEntity<>(articulos, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Articulo> getArticuloById(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        Articulo articulo = articuloService.getArticuloById(id);
-        if (articulo != null) {
-            return new ResponseEntity<>(articulo, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
-
-    @PostMapping
-    public ResponseEntity<Articulo> createArticulo(@RequestBody Articulo articulo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        Articulo nuevoArticulo = articuloService.createArticulo(articulo);
-        return new ResponseEntity<>(nuevoArticulo, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Articulo> updateArticulo(@PathVariable Long id, @RequestBody Articulo articulo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
