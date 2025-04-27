@@ -1,17 +1,21 @@
 package com.Tisj.services;
-
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
 
 @Service
 public class YoutubeService {
 
-//    public String getVideoInfo(String videoId) {
-//        // TODO: Implement logic to fetch video information from Youtube API
-//        return "Video info for videoId: " + videoId;
-//    }
-//
-//    public String getChannelInfo(String channelId) {
-//        // TODO: Implement logic to fetch channel information from Youtube API
-//        return "Channel info for channelId: " + channelId;
-//    }
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    public String getVideoDetails(String videoId) {
+        String API_KEY = "${YOUTUBE_API_KEY}";
+        String url = "https://www.googleapis.com/youtube/v3/videos"
+                + "?part=snippet,statistics"
+                + "&id=" + videoId
+                + "&key=" + API_KEY;
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        return response.getBody();
+    }
 }
