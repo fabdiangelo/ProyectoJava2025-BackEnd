@@ -16,11 +16,13 @@ public class ArticuloCliente {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false)
     private LocalDate caducidad;
-    private boolean completado;
+    @Column(nullable = false)
+    private Boolean completado;
 
     @ManyToOne
-    @JoinColumn(name = "articulo_id")
+    @JoinColumn(name = "articulo_id", nullable = false)
     private Articulo articulo;
 
     public ArticuloCliente(Articulo articulo){
