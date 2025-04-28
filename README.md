@@ -48,6 +48,5 @@
   - Mercado Pago Developer API.
 - **Videos:** Youtube Developer API.
 
-
-# TO DO:
-verificar que el usuario que 
+## Listado de EndPoints
+> [EndPoint.md](EndPoints.md#plan-básico-de-endpoints)

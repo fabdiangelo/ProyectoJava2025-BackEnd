@@ -1,46 +1,98 @@
 package com.Tisj.services;
 
 
+import com.Tisj.api.requests.RequestPaquete;
+import com.Tisj.bussines.entities.Curso;
 import com.Tisj.bussines.entities.Paquete;
-import com.Tisj.bussines.repositories.CursoRepository;
 import com.Tisj.bussines.repositories.PaqueteRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @Service
 public class PaqueteService {
 
     @Autowired
-    private ArticuloService articuloService;
+    private CursoService cursoService;
 
     @Autowired
     private PaqueteRepository paqueteRepository;
 
-    @Autowired
-    private CursoRepository cursoRepository;
-
     public List<Paquete> getAllPaquetes() {
-        return (List<Paquete>) (List<?>) articuloService.getAllArticulos();
+        return paqueteRepository.findAll();
     }
 
     public Paquete getPaqueteById(Long id) {
-        return (Paquete) articuloService.getArticuloById(id);
+        return paqueteRepository.findById(id).orElse(null);
+    }
+
+    public Paquete reqToPaquete(RequestPaquete reqPaquete) {
+        List<Curso> cursos = reqPaquete.getCursoIds()
+                .stream()
+                .map(id ->
+                        cursoService.getCursoById(id)
+                )
+                .toList();
+
+        if(cursos.stream().anyMatch(Objects::isNull)){
+            return null;
+        }
+
+        return new Paquete(
+                reqPaquete.getNombre(),
+                reqPaquete.getDescripcion(),
+                reqPaquete.getPrecio(),
+                reqPaquete.getVideoPresentacion(),
+                cursos
+        );
     }
 
     public Paquete createPaquete(Paquete paquete) {
-        return (Paquete) articuloService.createArticulo(paquete);
+        return paqueteRepository.save(paquete);
     }
 
     public Paquete updatePaquete(Long id, Paquete paquete) {
-        return (Paquete) articuloService.updateArticulo(id, paquete);
+        Paquete modificable = getPaqueteById(id);
+        if (modificable != null && paquete != null) {
+            paquete.setId(id);
+            paquete.setCursos(modificable.getCursos());
+            return paqueteRepository.save(paquete);
+        }
+        return null;
     }
 
-    public void deletePaquete(Long id) {
-        articuloService.deleteArticulo(id);
+    public boolean deleteCurso(Long id) {
+        if (paqueteRepository.existsById(id)) {
+            paqueteRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public List<Curso> getCursospaqueteById(Long id) {
+        Paquete paquete = getPaqueteById(id);
+        if(paquete == null) return null;
+        return paquete.getCursos();
+    }
+
+    public Paquete updateCursosPaquete(Long id, Long cursoId) {
+        Paquete modificable = getPaqueteById(id);
+        if (modificable != null) {
+            if(modificable.getCursos().stream().anyMatch(c -> Objects.equals(c.getId(), cursoId))){
+                modificable.setCursos(modificable.getCursos().stream().filter(c -> !Objects.equals(c.getId(), cursoId)).toList());
+            }else {
+                Curso c = cursoService.getCursoById(cursoId);
+                if(c == null){
+                    return null;
+                }
+                modificable.getCursos().add(c);
+            }
+            return paqueteRepository.save(modificable);
+        }
+        return null;
     }
 
     // public void associateCursoToPaquete(Long paqueteId, Long cursoId) {

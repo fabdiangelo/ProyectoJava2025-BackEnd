@@ -56,7 +56,7 @@ public class UsuarioController {
                     .anyMatch(p -> p.getAuthority().equals("ADMIN"))
         ) {
             DTUsuario response = usuarioService.getUsuario(email);
-            if(response == null) return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            if(response == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);

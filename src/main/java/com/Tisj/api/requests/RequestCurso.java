@@ -1,8 +1,10 @@
 package com.Tisj.api.requests;
 
+import com.Tisj.bussines.entities.Video;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -13,6 +15,8 @@ public class RequestCurso {
     private Float precio;
     private String videoPresentacion;
     private Integer duracionTotal;
+    private Integer edadObj;
+    private Character generoObj;
     private String pdf;
     private List<Long> videoIds;
 }
