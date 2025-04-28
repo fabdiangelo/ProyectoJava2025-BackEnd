@@ -50,7 +50,11 @@ public class YoutubeController {
 
             try {
                 YoutubeVideoDetails videoDetails = youtubeService.getVideoDetails(id);
-                return ResponseEntity.ok(videoDetails);
+                if (videoDetails.getItems() != null && !videoDetails.getItems().isEmpty()) {
+                    return ResponseEntity.ok(videoDetails.getItems().get(0));
+                } else {
+                    return ResponseEntity.notFound().build();
+                }
             } catch (IllegalArgumentException e) {
                 logger.warn("Solicitud inválida: {}", e.getMessage());
                 return ResponseEntity.badRequest().body(e.getMessage());

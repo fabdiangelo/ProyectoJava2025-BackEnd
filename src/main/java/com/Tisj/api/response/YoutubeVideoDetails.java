@@ -2,41 +2,55 @@ package com.Tisj.api.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class YoutubeVideoDetails {
+    @JsonProperty("items")
+    private List<Item> items;
 
-    @JsonProperty("id")
-    private String id;
-
-    @JsonProperty("snippet")
-    private Snippet snippet;
-
-    @JsonProperty("statistics")
-    private Statistics statistics;
-
-    public String getId() {
-        return id;
+    public List<Item> getItems() {
+        return items;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setItems(List<Item> items) {
+        this.items = items;
     }
 
-    public Snippet getSnippet() {
-        return snippet;
-    }
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Item {
+        @JsonProperty("id")
+        private String id;
 
-    public void setSnippet(Snippet snippet) {
-        this.snippet = snippet;
-    }
+        @JsonProperty("snippet")
+        private Snippet snippet;
 
-    public Statistics getStatistics() {
-        return statistics;
-    }
+        @JsonProperty("statistics")
+        private Statistics statistics;
 
-    public void setStatistics(Statistics statistics) {
-        this.statistics = statistics;
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public Snippet getSnippet() {
+            return snippet;
+        }
+
+        public void setSnippet(Snippet snippet) {
+            this.snippet = snippet;
+        }
+
+        public Statistics getStatistics() {
+            return statistics;
+        }
+
+        public void setStatistics(Statistics statistics) {
+            this.statistics = statistics;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

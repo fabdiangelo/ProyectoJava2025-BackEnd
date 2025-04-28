@@ -31,7 +31,7 @@ public class YoutubeService {
             logger.debug("Calling YouTube API with URL: {}", url);
             ResponseEntity<YoutubeVideoDetails> response = restTemplate.getForEntity(url, YoutubeVideoDetails.class);
 
-            if (response.getBody() == null) {
+            if (response.getBody() == null || response.getBody().getItems() == null || response.getBody().getItems().isEmpty()) {
                 throw new YoutubeApiException("No se encontró información para el video con ID: " + videoId);
             }
 
