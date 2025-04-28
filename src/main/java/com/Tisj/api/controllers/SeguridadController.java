@@ -1,5 +1,6 @@
 package com.Tisj.api.controllers;
 
+import com.Tisj.api.requests.LoginRequest;
 import com.Tisj.api.response.TokenUsuario;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.security.SeguridadService;
@@ -11,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.System;
 import java.util.Date;
@@ -23,21 +21,20 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("api/v1/seguridad")
+@RequestMapping("api/seguridad")
 public class SeguridadController {
 
     
     @Autowired
     private SeguridadService seguridadService;
 
-    @PostMapping("/autenticacion")
+    @PostMapping("/login")
     @Transactional(readOnly = true)
     public ResponseEntity<TokenUsuario> autenticarUsuario(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password
+            @RequestBody LoginRequest login
     ) {
         Usuario objUsuario = seguridadService
-                .autenticarUsuario(email, password)
+                .autenticarUsuario(login.getEmail(), login.getPassword())
                 .orElseThrow(() -> new RuntimeException("Usuario o password incorrecto."));
         String token = generarToken(objUsuario);
         TokenUsuario usuarioResponse

@@ -13,11 +13,11 @@
 - [Video](#video-controller-apivideos)
 - [-Curso](#curso-controller-apicursos)
 - [-Paquete](#paquete-controller-apipaquetes)
+- [Articulo - Cliente](#articulo-cliente-controller-apicurso-clienteemailarticuloid)
+- [Sesion](#sesion-controller-apisesion)
 - [Carrito](#carrito-controller-apicarrito)
 - [Pago](#pago-controller-apipagos)
 - [Oferta](#oferta-controller-apiofertas)
-- [Articulo](#articulo-controller-apiarticulos)
-- [Articulo - Cliente](#articulo-cliente-controller-apicurso-clienteemailarticuloid)
 - [Seguridad](#seguridad-controller-apiauth)
 
 
@@ -182,6 +182,59 @@
 ***
 
 
+### Articulo-Cliente-Controller `/api/artusr/`
+- `POST /api/artusr/art/{id}/usr/{email}` *USER/ADMIN*
+  - `201 CREATED` Se crea una nueva relación entre usuario y artículo.
+  - `403 FORBIDDEN` Fallo de autorización.
+
+
+- `GET /api/arcl` *ADMIN*
+  - `200 OK` Se muestran todas las relaciones entre usuarios y artículos.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existen relaciones.
+
+
+- `GET /api/arcl/art/{id}` *ADMIN*
+  - `200 OK` Se muestran los datos de las compras de un artículo.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el artículo.
+
+
+- `GET /api/arcl/usr/{email}` *USER/ADMIN*
+  - `200 OK` Se muestran los datos de los artículos comprados por el usuario.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el usuario.
+
+
+- `GET /api/arcl/art/{id}/usr/{email}` *USER/ADMIN*
+  - `200 OK` Se muestran los datos de la relación entre usuario y artículo.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el artículo / No existe el usuario.
+
+
+- `PUT /api/arcl/art/{id}/usr/{email}` *USER*
+  - `200 OK` Se actualizan la fecha de caducidad de la relación.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe el artículo / No existe el usuario.
+
+
+- `DELETE /api/curso-cliente/{email}/articulo/{id}` *USER*
+  - `200 OK` Se elimina la relación.
+  - `403 FORBIDDEN` Fallo de autorización.
+  - `404 NOT FOUND` No existe la relación.
+
+
+***
+
+
+### Sesion-Controller `/api/sesion`
+
+// TO DO
+
+
+***
+
+
 ### Carrito-Controller `/api/carrito`
 
 // TO DO
@@ -256,51 +309,6 @@
 // Logica de negocio faltante
 - `GET /api/ofertas/me` - Obtener los pagos de una oferta específica.  
   Resultado: 200 OK response status is 200
-
-
-***
-
-
-### Articulo-Cliente-Controller `/api/curso-cliente/{email}/articulo/{id}`
-- `POST /api/curso-cliente/{email}/articulo/{id}` *USER*
-  - `201 CREATED` Se creó una nueva relación entre usuario y artículo.
-  - `400 BAD REQUEST` Se envío un cuerpo de solicitud erróneo.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-- `GET /api/curso-cliente/{email}/articulo/{id}` *USER*
-  - `200 OK` Se muestran los datos de la relación entre usuario y artículo.
-  - `403 FORBIDDEN` Fallo de autorización.
-  - `404 NOT FOUND` No existe la relación.
-  
-
-- `GET /api/curso-cliente` *ADMIN*
-  - `200 OK` Se listan todas las relaciónes.
-  - `400 BAD REQUEST` No existen relaciones que listar.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-- `GET /api/curso-cliente/curso/{id}` *ADMIN*
-  - `200 OK` Se listan todos las relaciones con un curso dado.
-  - `400 BAD REQUEST` No existen relaciones que listar.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-- `GET /api/curso-cliente/usuario/{email}` *ADMIN*
-  - `200 OK` Se listan todos las relaciones de un usuario.
-  - `400 BAD REQUEST` No existen relaciones que listar.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-- `PUT /api/curso-cliente/{email}/articulo/{id}` *USER*
-  - `200 OK` Se actualizan los datos de la relación.
-  - `400 BAD REQUEST` No existe la relación / El body tiene un formato incorrecto.
-  - `403 FORBIDDEN` Fallo de autorización.
-
-
-- `DELETE /api/curso-cliente/{email}/articulo/{id}` *USER*
-  - `200 OK` Se elimina la relación.
-  - `400 BAD REQUEST` No existe la relación.
-  - `403 FORBIDDEN` Fallo de autorización.
 
 
 ***

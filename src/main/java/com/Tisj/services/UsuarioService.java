@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -31,13 +30,11 @@ public class UsuarioService {
     }
 
     public ListadoUsuarios listadoPersonas(){
-        ListadoUsuarios listadoUsuarios = new ListadoUsuarios();
-        listadoUsuarios.setUsuarios(
-                usuarioRepository.findAll()
+        List<DTUsuario> list = usuarioRepository.findAll()
                     .stream()
                     .map(Usuario::crearDT)
-                    .collect(Collectors.toList()));
-        return listadoUsuarios;
+                    .toList();
+        return new ListadoUsuarios(list);
     }
 
     public String crearCliente(RequestUsuario requestUsuario){

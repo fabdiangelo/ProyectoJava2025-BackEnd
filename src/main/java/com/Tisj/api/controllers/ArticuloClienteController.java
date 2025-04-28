@@ -17,6 +17,9 @@ import java.util.List;
 @RequestMapping("/api/articulos_cliente")
 public class ArticuloClienteController {
 
+
+    
+
     @Autowired
     private ArticuloClienteService articuloClienteService;
 
