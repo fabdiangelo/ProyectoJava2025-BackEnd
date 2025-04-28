@@ -21,28 +21,29 @@ public class ArticuloController {
     private ArticuloService articuloService;
 
     @GetMapping
-    public ResponseEntity<List<Articulo>> getArticulos() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<List<Articulo>> getAllArticulos() {
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            List<Articulo> articulos = articuloService.getAllArticulos();
-            return new ResponseEntity<>(articulos, HttpStatus.OK);
+        List<Articulo> articulos = articuloService.getAllArticulos();
+        return new ResponseEntity<>(articulos, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Articulo> getArticulo(@PathVariable Long id) {
+    public ResponseEntity<Articulo> getArticuloById(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            Articulo articulo = articuloService.getArticuloById(id);
-            if (articulo != null) {
-                return new ResponseEntity<>(articulo, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+        Articulo articulo = articuloService.getArticuloById(id);
+        if (articulo != null) {
+            return new ResponseEntity<>(articulo, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -53,8 +54,8 @@ public class ArticuloController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            Articulo nuevoArticulo = articuloService.createArticulo(articulo);
-            return new ResponseEntity<>(nuevoArticulo, HttpStatus.CREATED);
+        Articulo nuevoArticulo = articuloService.createArticulo(articulo);
+        return new ResponseEntity<>(nuevoArticulo, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -65,12 +66,12 @@ public class ArticuloController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            Articulo articuloActualizado = articuloService.updateArticulo(id, articulo);
-            if (articuloActualizado != null) {
-                return new ResponseEntity<>(articuloActualizado, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+        Articulo articuloActualizado = articuloService.updateArticulo(id, articulo);
+        if (articuloActualizado != null) {
+            return new ResponseEntity<>(articuloActualizado, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -81,8 +82,8 @@ public class ArticuloController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            articuloService.deleteArticulo(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        articuloService.deleteArticulo(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }

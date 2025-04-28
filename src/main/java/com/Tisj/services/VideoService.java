@@ -1,35 +1,40 @@
 package com.Tisj.services;
 
 import com.Tisj.bussines.entities.Video;
+import com.Tisj.bussines.repositories.VideoRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class VideoService {
 
+    @Autowired
+    private VideoRepository videoRepository;
+
     public List<Video> getAllVideos() {
-        // TODO: Implementar la lógica para obtener todos los videos
-        return new ArrayList<>();
+        return videoRepository.findAll(); // Obtener todos los videos
     }
 
     public Video getVideoById(Long id) {
-        // TODO: Implementar la lógica para obtener un video por su ID
-        return null;
+        return videoRepository.findById(id.intValue()).orElse(null); // Obtener video por ID
     }
 
     public Video createVideo(Video video) {
-        // TODO: Implementar la lógica para crear un nuevo video
-        return null;
+        return videoRepository.save(video); // Crear un nuevo video
     }
 
     public Video updateVideo(Long id, Video video) {
-        // TODO: Implementar la lógica para actualizar un video existente
+        if (videoRepository.existsById(id.intValue())) {
+            video.setId(id);
+            return videoRepository.save(video); // Actualizar video existente
+        }
         return null;
     }
 
     public void deleteVideo(Long id) {
-        // TODO: Implementar la lógica para eliminar un video
+        videoRepository.deleteById(id.intValue()); // Eliminar video por ID
     }
 }

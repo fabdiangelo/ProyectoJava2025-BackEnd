@@ -17,13 +17,9 @@ public class OfertaService {
     @Autowired
     private OfertaRepository ofertaRepository;
 
-    @Autowired
-    private CursoService cursoService;
-    @Autowired
-    private PaqueteService paqueteService;
 
 
-    public void aplicarOfertaACurso(Long cursoId, Long ofertaId) {
+   public void aplicarOfertaACurso(Long cursoId, Long ofertaId) {
         return;
     }
 
