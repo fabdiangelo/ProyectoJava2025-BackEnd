@@ -1,12 +1,14 @@
 package com.Tisj.services;
 
 import com.Tisj.api.requests.RequestCurso;
+import com.Tisj.api.requests.RequestVideo;
 import com.Tisj.bussines.entities.Curso;
 import com.Tisj.bussines.entities.Video;
 import com.Tisj.bussines.repositories.CursoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +20,9 @@ public class CursoService {
 
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private OfertaService ofertaService;
 
     public List<Curso> getAllCursos() {
         return cursoRepository.findAll();
@@ -43,25 +48,37 @@ public class CursoService {
 
     public boolean deleteCurso(Long id) {
         if (cursoRepository.existsById(id)) {
-            cursoRepository.deleteById(id);
-            return true;
+            Curso curso = getCursoById(id);
+            if (curso != null) {
+                // Eliminar videos que solo pertenecen a este curso
+                for (Video video : curso.getVideos()) {
+                    if (video.getCursos().size() == 1) { // Si solo está en este curso
+                        videoService.deleteVideo(video.getId());
+                    }
+                }
+                cursoRepository.deleteById(id);
+                return true;
+            }
         }
         return false;
     }
 
     public Curso reqToCurso(RequestCurso reqCurso) {
-        List<Video> videos = reqCurso.getVideoIds()
-                .stream()
-                .map(id ->
-                        videoService.getVideoById(id)
-                )
-                .toList();
-
-        if(videos.stream().anyMatch(Objects::isNull)){
-            return null;
+        List<Video> videos = new ArrayList<>();
+        
+        // Crear y guardar cada video
+        for (RequestVideo requestVideo : reqCurso.getVideos()) {
+            Video video = new Video(
+                requestVideo.getNombre(),
+                requestVideo.getDescripcion(),
+                0f, // Duración temporalmente en 0
+                requestVideo.getLink()
+            );
+            video = videoService.createVideo(video);
+            videos.add(video);
         }
 
-        return new Curso(
+        Curso curso = new Curso(
                 reqCurso.getNombre(),
                 reqCurso.getDescripcion(),
                 reqCurso.getPrecio(),
@@ -72,6 +89,13 @@ public class CursoService {
                 reqCurso.getPdf(),
                 videos
         );
+
+        // Asociar oferta si se recibe el ID
+        if (reqCurso.getOfertaId() != null) {
+            ofertaService.getOfertaById(reqCurso.getOfertaId()).ifPresent(curso::setOferta);
+        }
+
+        return cursoRepository.save(curso);
     }
 
     public List<Video> getVideosCursoById(Long id) {

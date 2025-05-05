@@ -23,14 +23,19 @@ public class CursoController {
     private CursoService cursoService;
 
     @PostMapping
-    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso reqCurso) {
+    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso requestCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            
+            // Verificar que hay al menos un video
+            if (requestCurso.getVideos() == null || requestCurso.getVideos().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
 
-            Curso curso = cursoService.createCurso(cursoService.reqToCurso(reqCurso));
-            if (curso == null){
-                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            Curso curso = cursoService.reqToCurso(requestCurso);
+            if (curso == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             return new ResponseEntity<>(curso, HttpStatus.CREATED);
         } else {
@@ -91,6 +96,10 @@ public class CursoController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            // Validar que hay al menos un video
+            if (reqCurso.getVideos() == null || reqCurso.getVideos().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             Curso cursoActualizado = cursoService.updateCurso(id, cursoService.reqToCurso(reqCurso));
             if (cursoActualizado == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

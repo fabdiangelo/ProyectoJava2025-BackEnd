@@ -25,6 +25,8 @@ public class YoutubeVideoDetails {
         @JsonProperty("snippet")
         private Snippet snippet;
 
+        @JsonProperty("contentDetails")
+        private ContentDetails contentDetails;
         @JsonProperty("statistics")
         private Statistics statistics;
 
@@ -34,6 +36,14 @@ public class YoutubeVideoDetails {
 
         public void setId(String id) {
             this.id = id;
+        }
+
+        public ContentDetails getContentDetails() {
+            return contentDetails;
+        }
+
+        public void setContentDetails(ContentDetails contentDetails) {
+            this.contentDetails = contentDetails;
         }
 
         public Snippet getSnippet() {
@@ -75,6 +85,20 @@ public class YoutubeVideoDetails {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ContentDetails {
+        @JsonProperty("duration")
+        private String duration;
+
+        public String getDuration() {
+            return duration;
+        }
+
+        public void setDuration(String duration) {
+            this.duration = duration;
         }
     }
 

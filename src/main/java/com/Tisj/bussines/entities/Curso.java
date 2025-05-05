@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,9 +18,10 @@ public class Curso extends Articulo{
     private Integer duracionTotal;
     private String pdf;
     private Integer edadObj;
-    private Character generoObj;
+    private String generoObj;
 
     @ManyToMany(mappedBy = "cursos")
+    @JsonIgnore
     private List<Paquete> paquetes;
 
     @ManyToMany
@@ -30,7 +32,7 @@ public class Curso extends Articulo{
     )
     private List<Video> videos;
 
-    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, Character generoObj, String pdf, List<Video> videos){
+    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, String generoObj, String pdf, List<Video> videos){
         super(nombre, descripcion, precio, videoPresentacion);
         this.duracionTotal = duracionTotal;
         this.edadObj = edadObj;

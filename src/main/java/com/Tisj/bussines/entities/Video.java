@@ -4,9 +4,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -21,6 +24,9 @@ public class Video {
     private String descripcion;
     private Float duracion;
     private String link;
+
+    @ManyToMany(mappedBy = "videos")
+    private List<Curso> cursos = new ArrayList<>();
 
     public Video (String nombre, String descripcion, Float duracion, String link){
         this.nombre = nombre;

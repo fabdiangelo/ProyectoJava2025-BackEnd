@@ -16,7 +16,8 @@ public class RequestCurso {
     private String videoPresentacion;
     private Integer duracionTotal;
     private Integer edadObj;
-    private Character generoObj;
+    private String generoObj;
     private String pdf;
-    private List<Long> videoIds;
+    private Long ofertaId;
+    private List<RequestVideo> videos;
 }

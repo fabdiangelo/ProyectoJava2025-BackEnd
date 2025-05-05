@@ -8,6 +8,5 @@ import lombok.Setter;
 public class RequestVideo {
     private String nombre;
     private String descripcion;
-    private Float duracion;
     private String link;
 }
