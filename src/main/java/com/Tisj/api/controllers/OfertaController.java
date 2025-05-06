@@ -6,6 +6,7 @@ import com.Tisj.bussines.entities.DT.DTOferta;
 import com.Tisj.bussines.entities.Oferta;
 import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.services.OfertaService;
+import com.Tisj.services.ArticuloService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class OfertaController {
 
     @Autowired
     private OfertaService ofertaService;
+
+    @Autowired
+    private ArticuloService articuloService;
 
     // Utilitario para mapear Oferta a DTOferta
     private DTOferta mapToDTOferta(Oferta oferta) {
@@ -109,7 +113,16 @@ public class OfertaController {
             oferta.setInicio(requestOferta.getInicio());
             oferta.setFin(requestOferta.getFin());
             oferta.setActivo(requestOferta.isActivo());
-            
+
+            // Asociar artículos si se pasan IDs
+            if (requestOferta.getArticulosIds() != null && !requestOferta.getArticulosIds().isEmpty()) {
+                List<Articulo> articulos = requestOferta.getArticulosIds().stream()
+                        .map(articuloService::getArticuloById)
+                        .filter(a -> a != null)
+                        .collect(Collectors.toList());
+                articulos.forEach(a -> a.setOferta(oferta));
+                oferta.setArticulos(articulos);
+            }
             Oferta nuevaOferta = ofertaService.createOferta(oferta);
             return new ResponseEntity<>(nuevaOferta, HttpStatus.CREATED);
         } else {
@@ -149,6 +162,28 @@ public class OfertaController {
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
             ofertaService.deleteOferta(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping("/{id}/articulos")
+    public ResponseEntity<?> asociarArticulosAOferta(@PathVariable Long id, @RequestBody List<Long> articulosIds) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream().anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            Optional<Oferta> ofertaOpt = ofertaService.getOfertaById(id);
+            if (ofertaOpt.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            Oferta oferta = ofertaOpt.get();
+            List<Articulo> articulos = articulosIds.stream()
+                    .map(articuloService::getArticuloById)
+                    .filter(a -> a != null)
+                    .collect(Collectors.toList());
+            articulos.forEach(a -> a.setOferta(oferta));
+            oferta.setArticulos(articulos);
+            ofertaService.updateOferta(id, oferta);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
