@@ -1,18 +1,20 @@
 package com.Tisj.services;
 
-
 import com.Tisj.api.requests.RequestPaquete;
 import com.Tisj.bussines.entities.Curso;
 import com.Tisj.bussines.entities.Paquete;
 import com.Tisj.bussines.repositories.PaqueteRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional
 public class PaqueteService {
 
     @Autowired
@@ -21,20 +23,29 @@ public class PaqueteService {
     @Autowired
     private PaqueteRepository paqueteRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Transactional(readOnly = true)
     public List<Paquete> getAllPaquetes() {
-        return paqueteRepository.findByActivoTrue();
+        List<Paquete> paquetes = paqueteRepository.findByActivoTrue();
+        paquetes.forEach(p -> p.getCursos().size()); // Forzar la inicialización
+        return paquetes;
     }
 
+    @Transactional(readOnly = true)
     public Paquete getPaqueteById(Long id) {
-        return paqueteRepository.findByIdAndActivoTrue(id);
+        Paquete paquete = paqueteRepository.findByIdAndActivoTrue(id);
+        if (paquete != null) {
+            paquete.getCursos().size(); // Forzar la inicialización
+        }
+        return paquete;
     }
 
     public Paquete reqToPaquete(RequestPaquete reqPaquete) {
         List<Curso> cursos = reqPaquete.getCursoIds()
                 .stream()
-                .map(id ->
-                        cursoService.getCursoById(id)
-                )
+                .map(id -> cursoService.getCursoById(id))
                 .toList();
 
         if(cursos.stream().anyMatch(Objects::isNull)){
@@ -48,7 +59,7 @@ public class PaqueteService {
                 reqPaquete.getVideoPresentacion(),
                 cursos
         );
-        paquete .setActivo(true);
+        paquete.setActivo(true);
         return paquete;
     }
 
@@ -78,6 +89,7 @@ public class PaqueteService {
         return false;
     }
 
+    @Transactional(readOnly = true)
     public List<Curso> getCursosDelPaquete(Long id) {
         Paquete paquete = getPaqueteById(id);
         if(paquete == null) return null;
