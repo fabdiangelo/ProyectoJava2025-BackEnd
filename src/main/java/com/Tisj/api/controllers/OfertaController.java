@@ -1,7 +1,12 @@
 package com.Tisj.api.controllers;
 
+import com.Tisj.api.requests.RequestOferta;
+import com.Tisj.bussines.entities.DT.DTArticulo;
+import com.Tisj.bussines.entities.DT.DTOferta;
 import com.Tisj.bussines.entities.Oferta;
+import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.services.OfertaService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -21,38 +27,68 @@ public class OfertaController {
     @Autowired
     private OfertaService ofertaService;
 
+    // Utilitario para mapear Oferta a DTOferta
+    private DTOferta mapToDTOferta(Oferta oferta) {
+        List<DTArticulo> dtArticulos = oferta.getArticulos() != null ?
+            oferta.getArticulos().stream().map(this::mapToDTArticulo).collect(Collectors.toList()) :
+            null;
+        return new DTOferta(
+            oferta.getId(),
+            oferta.getNombre(),
+            oferta.getDescripcion(),
+            oferta.getValor(),
+            oferta.getInicio(),
+            oferta.getFin(),
+            oferta.isActivo(),
+            dtArticulos
+        );
+    }
+
+    private DTArticulo mapToDTArticulo(Articulo articulo) {
+        return new DTArticulo(
+            articulo.getId(),
+            articulo.getNombre(),
+            articulo.getDescripcion(),
+            articulo.getPrecio(),
+            articulo.getVideoPresentacion(),
+            articulo.isActivo()
+        );
+    }
+
     @GetMapping("/me")
-        public ResponseEntity<List<Oferta>> getMyOfertas() {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth.getAuthorities().stream()
-                    .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            } else {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
+    public ResponseEntity<List<DTOferta>> getMyOfertas() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+    }
 
     @GetMapping
-    public ResponseEntity<List<Oferta>> getOfertas() {
+    public ResponseEntity<List<DTOferta>> getOfertas() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
             List<Oferta> ofertas = ofertaService.getAllOfertas();
-            return new ResponseEntity<>(ofertas, HttpStatus.OK);
+            List<DTOferta> dtOfertas = ofertas.stream().map(this::mapToDTOferta).collect(Collectors.toList());
+            return new ResponseEntity<>(dtOfertas, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Oferta> getOferta(@PathVariable Long id) {
+    public ResponseEntity<DTOferta> getOferta(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
             Optional<Oferta> ofertaOptional = ofertaService.getOfertaById(id);
             Oferta oferta = ofertaOptional.orElse(null);
             if (oferta != null) {
-                return new ResponseEntity<>(oferta, HttpStatus.OK);
+                DTOferta dtOferta = mapToDTOferta(oferta);
+                return new ResponseEntity<>(dtOferta, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -62,10 +98,18 @@ public class OfertaController {
     }
 
     @PostMapping
-    public ResponseEntity<Oferta> createOferta(@RequestBody Oferta oferta) {
+    public ResponseEntity<Oferta> createOferta(@Valid @RequestBody RequestOferta requestOferta) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            Oferta oferta = new Oferta();
+            oferta.setNombre(requestOferta.getNombre());
+            oferta.setDescripcion(requestOferta.getDescripcion());
+            oferta.setValor(requestOferta.getValor());
+            oferta.setInicio(requestOferta.getInicio());
+            oferta.setFin(requestOferta.getFin());
+            oferta.setActivo(requestOferta.isActivo());
+            
             Oferta nuevaOferta = ofertaService.createOferta(oferta);
             return new ResponseEntity<>(nuevaOferta, HttpStatus.CREATED);
         } else {
@@ -74,10 +118,19 @@ public class OfertaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Oferta> updateOferta(@PathVariable Long id, @RequestBody Oferta oferta) {
+    public ResponseEntity<Oferta> updateOferta(@PathVariable Long id, @Valid @RequestBody RequestOferta requestOferta) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            Oferta oferta = new Oferta();
+            oferta.setId(id);
+            oferta.setNombre(requestOferta.getNombre());
+            oferta.setDescripcion(requestOferta.getDescripcion());
+            oferta.setValor(requestOferta.getValor());
+            oferta.setInicio(requestOferta.getInicio());
+            oferta.setFin(requestOferta.getFin());
+            oferta.setActivo(requestOferta.isActivo());
+            
             Oferta ofertaActualizada = ofertaService.updateOferta(id, oferta);
             if (ofertaActualizada != null) {
                 return new ResponseEntity<>(ofertaActualizada, HttpStatus.OK);

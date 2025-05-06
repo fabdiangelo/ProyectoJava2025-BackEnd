@@ -9,11 +9,15 @@ import com.Tisj.bussines.repositories.CursoRepository;
 import com.Tisj.bussines.repositories.PaqueteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class OfertaService {
 
     @Autowired
@@ -24,6 +28,23 @@ public class OfertaService {
 
     @Autowired
     private PaqueteRepository paqueteRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Transactional(readOnly = true)
+    public List<Oferta> getAllOfertas() {
+        List<Oferta> ofertas = ofertaRepository.findAll();
+        ofertas.forEach(o -> o.getArticulos().size()); // Forzar la inicialización
+        return ofertas;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Oferta> getOfertaById(Long id) {
+        Optional<Oferta> ofertaOpt = ofertaRepository.findById(id);
+        ofertaOpt.ifPresent(o -> o.getArticulos().size()); // Forzar la inicialización
+        return ofertaOpt;
+    }
 
     public void aplicarOfertaACurso(Long cursoId, Long ofertaId) {
         Optional<Oferta> ofertaOpt = ofertaRepository.findById(ofertaId);
@@ -47,14 +68,6 @@ public class OfertaService {
                 paqueteRepository.save(paquete);
             }
         }
-    }
-
-    public List<Oferta> getAllOfertas() {
-        return ofertaRepository.findAll();
-    }
-
-    public Optional<Oferta> getOfertaById(Long id) {
-        return ofertaRepository.findById(id);
     }
 
     public Oferta createOferta(Oferta oferta) {
