@@ -23,14 +23,19 @@ public class CursoController {
     private CursoService cursoService;
 
     @PostMapping
-    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso reqCurso) {
+    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso requestCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            
+            // Verificar que hay al menos un video
+            if (requestCurso.getVideos() == null || requestCurso.getVideos().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
 
-            Curso curso = cursoService.createCurso(cursoService.reqToCurso(reqCurso));
-            if (curso == null){
-                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            Curso curso = cursoService.reqToCurso(requestCurso);
+            if (curso == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             return new ResponseEntity<>(curso, HttpStatus.CREATED);
         } else {
@@ -70,27 +75,15 @@ public class CursoController {
         }
     }
 
-    @GetMapping("/{id}/videos")
-    public ResponseEntity<List<Video>> getVideosCurso(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
-                        || p.getAuthority().equals("USER")))) {
-            List<Video> videos = cursoService.getVideosCursoById(id);
-            if (videos == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(videos, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Curso> updateCurso(@PathVariable Long id, @RequestBody RequestCurso reqCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            // Validar que hay al menos un video
+            if (reqCurso.getVideos() == null || reqCurso.getVideos().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             Curso cursoActualizado = cursoService.updateCurso(id, cursoService.reqToCurso(reqCurso));
             if (cursoActualizado == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

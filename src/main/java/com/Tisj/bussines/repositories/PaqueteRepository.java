@@ -6,7 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import com.Tisj.bussines.entities.Paquete;
 
+import java.util.List;
+
 @Repository
 public interface PaqueteRepository extends JpaRepository<Paquete, Long> {
-    
+    List<Paquete> findByActivoTrue();
+    Paquete findByIdAndActivoTrue(Long id);
 }
