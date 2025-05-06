@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,20 +18,16 @@ public class Curso extends Articulo{
     private Integer duracionTotal;
     private String pdf;
     private Integer edadObj;
-    private Character generoObj;
+    private String generoObj;
 
     @ManyToMany(mappedBy = "cursos")
+    @JsonIgnore
     private List<Paquete> paquetes;
 
-    @ManyToMany
-    @JoinTable(
-            name = "curso-videos",
-            joinColumns = @JoinColumn(name = "curso_id"),
-            inverseJoinColumns = @JoinColumn(name = "video_id")
-    )
-    private List<Video> videos;
+    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Video> videos = new ArrayList<>();
 
-    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, Character generoObj, String pdf, List<Video> videos){
+    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, String generoObj, String pdf, List<Video> videos){
         super(nombre, descripcion, precio, videoPresentacion);
         this.duracionTotal = duracionTotal;
         this.edadObj = edadObj;

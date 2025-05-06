@@ -11,4 +11,6 @@ import com.Tisj.bussines.entities.Curso;
 
 @Repository
 public interface CursoRepository extends JpaRepository<Curso, Long> {
+    List<Curso> findByActivoTrue();
+    Curso findByIdAndActivoTrue(Long id);
 }

@@ -4,9 +4,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.FetchType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.List;
 
@@ -15,12 +18,14 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Paquete extends Articulo{
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "paquete_curso",
             joinColumns = @JoinColumn(name = "paquete_id"),
             inverseJoinColumns = @JoinColumn(name = "curso_id")
     )
+    @JsonManagedReference
+    @JsonIgnoreProperties("paquetes")
     private List<Curso> cursos;
 
 
