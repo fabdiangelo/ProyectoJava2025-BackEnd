@@ -59,17 +59,6 @@ public class OfertaController {
         );
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<List<DTOferta>> getMyOfertas() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
-
     @GetMapping
     public ResponseEntity<List<DTOferta>> getOfertas() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
