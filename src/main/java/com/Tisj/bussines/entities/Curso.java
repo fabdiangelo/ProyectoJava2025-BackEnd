@@ -24,13 +24,8 @@ public class Curso extends Articulo{
     @JsonIgnore
     private List<Paquete> paquetes;
 
-    @ManyToMany
-    @JoinTable(
-            name = "curso-videos",
-            joinColumns = @JoinColumn(name = "curso_id"),
-            inverseJoinColumns = @JoinColumn(name = "video_id")
-    )
-    private List<Video> videos;
+    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Video> videos = new ArrayList<>();
 
     public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, String generoObj, String pdf, List<Video> videos){
         super(nombre, descripcion, precio, videoPresentacion);

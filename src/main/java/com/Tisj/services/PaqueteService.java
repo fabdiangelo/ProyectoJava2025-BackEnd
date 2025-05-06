@@ -22,11 +22,11 @@ public class PaqueteService {
     private PaqueteRepository paqueteRepository;
 
     public List<Paquete> getAllPaquetes() {
-        return paqueteRepository.findAll();
+        return paqueteRepository.findByActivoTrue();
     }
 
     public Paquete getPaqueteById(Long id) {
-        return paqueteRepository.findById(id).orElse(null);
+        return paqueteRepository.findByIdAndActivoTrue(id);
     }
 
     public Paquete reqToPaquete(RequestPaquete reqPaquete) {
@@ -41,16 +41,19 @@ public class PaqueteService {
             return null;
         }
 
-        return new Paquete(
+        Paquete paquete = new Paquete(
                 reqPaquete.getNombre(),
                 reqPaquete.getDescripcion(),
                 reqPaquete.getPrecio(),
                 reqPaquete.getVideoPresentacion(),
                 cursos
         );
+        paquete .setActivo(true);
+        return paquete;
     }
 
     public Paquete createPaquete(Paquete paquete) {
+        paquete.setActivo(true);
         return paqueteRepository.save(paquete);
     }
 
@@ -59,20 +62,23 @@ public class PaqueteService {
         if (modificable != null && paquete != null) {
             paquete.setId(id);
             paquete.setCursos(modificable.getCursos());
+            paquete.setActivo(true);
             return paqueteRepository.save(paquete);
         }
         return null;
     }
 
-    public boolean deleteCurso(Long id) {
-        if (paqueteRepository.existsById(id)) {
-            paqueteRepository.deleteById(id);
+    public boolean deletePaquete(Long id) {
+        Paquete paquete = getPaqueteById(id);
+        if (paquete != null) {
+            paquete.setActivo(false);
+            paqueteRepository.save(paquete);
             return true;
         }
         return false;
     }
 
-    public List<Curso> getCursospaqueteById(Long id) {
+    public List<Curso> getCursosDelPaquete(Long id) {
         Paquete paquete = getPaqueteById(id);
         if(paquete == null) return null;
         return paquete.getCursos();

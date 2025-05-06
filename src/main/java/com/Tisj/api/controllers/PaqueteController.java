@@ -74,13 +74,13 @@ public class PaqueteController {
         }
     }
 
-    @GetMapping("/{id}/videos")
-    public ResponseEntity<List<Curso>> getVideosCurso(@PathVariable Long id) {
+    @GetMapping("/{id}/cursos")
+    public ResponseEntity<List<Curso>> getCursosDelPaquete(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> (p.getAuthority().equals("ADMIN")
                         || p.getAuthority().equals("USER")))) {
-            List<Curso> cursos = paqueteService.getCursospaqueteById(id);
+            List<Curso> cursos = paqueteService.getCursosDelPaquete(id);
             if (cursos == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -126,12 +126,12 @@ public class PaqueteController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            if(paqueteService.deleteCurso(id)){
+            if(paqueteService.deletePaquete(id)){
                 return new ResponseEntity<>(HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-    else {
+        }
+        else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }

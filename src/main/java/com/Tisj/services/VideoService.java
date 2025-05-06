@@ -17,38 +17,28 @@ public class VideoService {
     private CursoRepository cursoRepository;
 
     public List<Video> getAllVideos() {
-        return videoRepository.findAll(); // Obtener todos los videos
+        return videoRepository.findByActivoTrue();
     }
 
     public Video getVideoById(Long id) {
-        return videoRepository.findById(id.intValue()).orElse(null); // Obtener video por ID
+        return videoRepository.findByIdAndActivoTrue(id);
     }
 
     public Video createVideo(Video video) {
-        return videoRepository.save(video); // Crear un nuevo video
+        video.setActivo(true);
+        return videoRepository.save(video);
     }
 
-    public Video updateVideo(Long id, Video video) {
-        if (videoRepository.existsById(id.intValue())) {
-            video.setId(id);
-            return videoRepository.save(video); // Actualizar video existente
+
+
+    public boolean deleteVideo(Long id) {
+        Video video = getVideoById(id);
+        if (video != null) {
+            video.setActivo(false);
+            videoRepository.save(video);
+            return true;
         }
-        return null;
-    }
-
-    public void deleteVideo(Long id) {
-        // Find courses that contain the video
-        List<Curso> cursos = cursoRepository.findAll().stream()
-                .filter(curso -> curso.getVideos() != null && curso.getVideos().stream().anyMatch(video -> video.getId().equals(id)))
-                .toList();
-
-        // Remove the video from each course
-        cursos.forEach(curso -> {
-            curso.getVideos().removeIf(video -> video.getId().equals(id));
-            cursoRepository.save(curso);
-        });
-
-        videoRepository.deleteById(id.intValue()); // Eliminar video por ID
+        return false;
     }
 
     public String extractVideoId(String videoLink) {

@@ -75,22 +75,6 @@ public class CursoController {
         }
     }
 
-    @GetMapping("/{id}/videos")
-    public ResponseEntity<List<Video>> getVideosCurso(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
-                        || p.getAuthority().equals("USER")))) {
-            List<Video> videos = cursoService.getVideosCursoById(id);
-            if (videos == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(videos, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Curso> updateCurso(@PathVariable Long id, @RequestBody RequestCurso reqCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

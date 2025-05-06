@@ -5,6 +5,8 @@ import com.Tisj.bussines.entities.Curso;
 import com.Tisj.bussines.entities.Paquete;
 import com.Tisj.bussines.entities.Enum.EnumDescuento;
 import com.Tisj.bussines.repositories.OfertaRepository;
+import com.Tisj.bussines.repositories.CursoRepository;
+import com.Tisj.bussines.repositories.PaqueteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +19,35 @@ public class OfertaService {
     @Autowired
     private OfertaRepository ofertaRepository;
 
+    @Autowired
+    private CursoRepository cursoRepository;
 
+    @Autowired
+    private PaqueteRepository paqueteRepository;
 
-   public void aplicarOfertaACurso(Long cursoId, Long ofertaId) {
-        return;
+    public void aplicarOfertaACurso(Long cursoId, Long ofertaId) {
+        Optional<Oferta> ofertaOpt = ofertaRepository.findById(ofertaId);
+        if (ofertaOpt.isPresent()) {
+            Oferta oferta = ofertaOpt.get();
+            Curso curso = cursoRepository.findById(cursoId).orElse(null);
+            if (curso != null) {
+                curso.setOferta(oferta);
+                cursoRepository.save(curso);
+            }
+        }
     }
 
     public void aplicarOfertaAPaquete(Long paqueteId, Long ofertaId) {
-       return;
+        Optional<Oferta> ofertaOpt = ofertaRepository.findById(ofertaId);
+        if (ofertaOpt.isPresent()) {
+            Oferta oferta = ofertaOpt.get();
+            Paquete paquete = paqueteRepository.findById(paqueteId).orElse(null);
+            if (paquete != null) {
+                paquete.setOferta(oferta);
+                paqueteRepository.save(paquete);
+            }
         }
+    }
 
     public List<Oferta> getAllOfertas() {
         return ofertaRepository.findAll();

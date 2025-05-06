@@ -30,11 +30,14 @@ public class Articulo {
     @JoinColumn(name = "oferta_id")
     private Oferta oferta;
 
+    private boolean activo = true;
+
     public Articulo (String nombre, String descripcion, Float precio, String videoPresentacion){
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
         this.videoPresentacion = videoPresentacion;
         this.oferta = null;
+        this.activo = true;
     }
 }
