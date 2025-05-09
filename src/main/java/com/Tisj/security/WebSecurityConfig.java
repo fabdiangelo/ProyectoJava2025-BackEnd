@@ -36,7 +36,7 @@ public class WebSecurityConfig {
                 .addFilterBefore(new FiltroJWTAutorizacion(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers(antMatcher("/api/v1/seguridad/**")).permitAll()
+                        .requestMatchers(antMatcher("/api/seguridad/**")).permitAll()
                         .requestMatchers(antMatcher("/v3/api-docs/**")).permitAll()
                         .requestMatchers(antMatcher("/swagger-ui/**")).permitAll()
                         .requestMatchers(antMatcher("/swagger-resources/**")).permitAll()
