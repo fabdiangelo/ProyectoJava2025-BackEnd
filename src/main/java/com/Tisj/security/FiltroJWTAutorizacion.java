@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class FiltroJWTAutorizacion extends OncePerRequestFilter {
 
-    private final String CLAVE = "@TI2025";
+    private final String CLAVE =  System.getenv("SECRET_KEY");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

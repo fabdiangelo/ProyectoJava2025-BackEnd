@@ -44,7 +44,7 @@ public class SeguridadController {
     }
 
     private String generarToken(Usuario usuario) {
-        String clave = "@TI2025"; // dinamico desde la BD
+        String clave = System.getenv("SECRET_KEY");
         List<GrantedAuthority> grantedAuthorityList
                 = AuthorityUtils.createAuthorityList(
                         seguridadService.listarRolesPorUsuario(usuario)
