@@ -9,12 +9,12 @@ import java.time.Duration;
 
 @Configuration
 public class PayPalConfig {
-    @Value("${TU_CLIENT_ID}")
+    @Value("${paypal.client.id}")
     private String clientId;
 
-    @Value("${TU_CLIENT_SECRET}")
+    @Value("${paypal.client.secret}")
     private String clientSecret;
-
+    
     @Value("${paypal.mode:sandbox}")
     private String mode;
 

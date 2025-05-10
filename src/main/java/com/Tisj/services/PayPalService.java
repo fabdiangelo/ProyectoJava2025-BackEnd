@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
 import java.util.Collections;
+import java.math.BigDecimal;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,20 @@ public class PayPalService {
     }
 
     public Root createOrder(RequestPago requestPago) {
+        // Validar datos de entrada
+        if (requestPago.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que 0");
+        }
+        if (requestPago.getMoneda() == null || requestPago.getMoneda().length() != 3) {
+            throw new IllegalArgumentException("La moneda debe ser un código válido de 3 caracteres (ej: USD, EUR)");
+        }
+        if (requestPago.getReturnUrl() == null || !requestPago.getReturnUrl().startsWith("http")) {
+            throw new IllegalArgumentException("URL de retorno inválida");
+        }
+        if (requestPago.getCancelUrl() == null || !requestPago.getCancelUrl().startsWith("http")) {
+            throw new IllegalArgumentException("URL de cancelación inválida");
+        }
+
         String accessToken = getAccessToken();
 
         HttpHeaders headers = new HttpHeaders();
@@ -63,8 +79,8 @@ public class PayPalService {
         
         PurchaseUnit purchaseUnit = new PurchaseUnit();
         Amount amount = new Amount();
-        amount.setCurrency_code(requestPago.getMoneda() != null ? requestPago.getMoneda() : "USD");
-        amount.setValue(requestPago.getMonto().toString());
+        amount.setCurrency_code(requestPago.getMoneda());
+        amount.setValue(requestPago.getMonto().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
         
         purchaseUnit.setAmount(amount);
         purchaseUnit.setDescription(requestPago.getDescripcion());
@@ -73,6 +89,9 @@ public class PayPalService {
         Root.ApplicationContext applicationContext = new Root.ApplicationContext();
         applicationContext.setReturn_url(requestPago.getReturnUrl());
         applicationContext.setCancel_url(requestPago.getCancelUrl());
+        applicationContext.setBrand_name("Solariano");
+        applicationContext.setLanding_page("LOGIN");
+        applicationContext.setUser_action("PAY_NOW");
         order.setApplication_context(applicationContext);
 
         order.setPurchase_units(Collections.singletonList(purchaseUnit));

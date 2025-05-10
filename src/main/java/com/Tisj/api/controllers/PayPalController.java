@@ -41,7 +41,7 @@ public class PayPalController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/createorder")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createOrder(@RequestBody RequestPago requestPago) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
