@@ -1,16 +1,13 @@
 package com.Tisj.api.Paypal;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ClientTokenResponse {
-
+    @JsonProperty("client_token")
     private String clientToken;
-    private String clientId;
-    private String paypalSdkBaseUrl;
 
-    public ClientTokenResponse(String clientId, String clientToken, String paypalSdkBaseUrl) {
-        this.clientId = clientId;
-        this.clientToken = clientToken;
-        this.paypalSdkBaseUrl = paypalSdkBaseUrl;
-    }
+    @JsonProperty("expires_in")
+    private Integer expiresIn;
 
     public String getClientToken() {
         return clientToken;
@@ -20,19 +17,11 @@ public class ClientTokenResponse {
         this.clientToken = clientToken;
     }
 
-    public String getClientId() {
-        return clientId;
+    public Integer getExpiresIn() {
+        return expiresIn;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getPaypalSdkBaseUrl() {
-        return paypalSdkBaseUrl;
-    }
-
-    public void setPaypalSdkBaseUrl(String paypalSdkBaseUrl) {
-        this.paypalSdkBaseUrl = paypalSdkBaseUrl;
+    public void setExpiresIn(Integer expiresIn) {
+        this.expiresIn = expiresIn;
     }
 }

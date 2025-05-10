@@ -9,16 +9,19 @@
   - `404 NOT FOUND` No se encontró el elemento correspondiente
 
 ## Índice
-- [-Usuario](#usuario-controller-apiusuarios)
-- [Video](#video-controller-apivideos)
-- [-Curso](#curso-controller-apicursos)
-- [-Paquete](#paquete-controller-apipaquetes)
-- [Articulo - Cliente](#articulo-cliente-controller-apicurso-clienteemailarticuloid)
-- [Sesion](#sesion-controller-apisesion)
-- [Carrito](#carrito-controller-apicarrito)
-- [Pago](#pago-controller-apipagos)
-- [Oferta](#oferta-controller-apiofertas)
-- [Seguridad](#seguridad-controller-apiauth)
+- [Plan Básico de Endpoints](#plan-básico-de-endpoints)
+          - [25/04/2025](#25042025)
+  - [Índice](#índice)
+    - [Usuario-Controller `/api/usuarios`](#usuario-controller-apiusuarios)
+    - [Video-Controller `/api/videos`](#video-controller-apivideos)
+    - [Curso-Controller `/api/cursos`](#curso-controller-apicursos)
+    - [Paquete-Controller `/api/paquetes`](#paquete-controller-apipaquetes)
+    - [Articulo-Cliente-Controller `/api/artusr/`](#articulo-cliente-controller-apiartusr)
+    - [Sesion-Controller `/api/sesion`](#sesion-controller-apisesion)
+    - [Carrito-Controller `/api/carrito`](#carrito-controller-apicarrito)
+    - [Pago-Controller `/api/pagos`](#pago-controller-apipagos)
+    - [Oferta-Controller `/api/ofertas`](#oferta-controller-apiofertas)
+    - [Seguridad-Controller (`/api/auth`)\*\*](#seguridad-controller-apiauth)
 
 
 ***
@@ -341,4 +344,21 @@
 - `POST /api/email/send` - Enviar un correo electrónico (ej. bienvenida, notificación, etc.). El cuerpo del request contendría destinatario, asunto, contenido.  
   Resultado:
 
-Lo que hay disponible son dos metodos Get, hay que revistar los controllers 
+Lo que hay disponible son dos metodos Get, hay que revistar los controlle
+
+Update
+
+PayPal Controller
+
+Post /api/orders
+{
+  "monto": 100.00,
+  "descripcion": "Compra de curso de programación",
+  "articulosIds": [
+    "ART001",
+    "ART002"
+  ],
+  "moneda": "USD",
+  "returnUrl": "https://tu-dominio.com/success",
+  "cancelUrl": "https://tu-dominio.com/cancel"
+}

@@ -1,6 +1,13 @@
+
 package com.Tisj.api.pojo.PayPal;
 
-public class Payee{
-    public String email_address;
-    public String merchant_id;
+import lombok.Data;
+
+@Data
+public class Payee {
+    private String email_address;
+    private String merchant_id;
+    private String display_data;
+    private String payee_display_metadata;
 }
+
