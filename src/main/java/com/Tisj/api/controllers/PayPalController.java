@@ -83,47 +83,6 @@ public class PayPalController {
         }
     }
 
-    @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> listOrders() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))
-        ) {
-            try {
-                Root orders = payPalService.listOrders();
-                return ResponseEntity.ok(orders);
-            } catch (Exception e) {
-                log.error("Error al listar las órdenes: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error al listar las órdenes: " + e.getMessage());
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Solo los administradores pueden ver todas las órdenes");
-        }
-    }
-
-    @GetMapping("/{orderId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getOrder(@PathVariable String orderId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))
-        ) {
-            try {
-                Root order = payPalService.getOrder(orderId);
-                return ResponseEntity.ok(order);
-            } catch (Exception e) {
-                log.error("Error al obtener la orden: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error al obtener la orden: " + e.getMessage());
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tiene permisos para ver esta orden");
-        }
-    }
 
     @GetMapping("/client-token")
     @PreAuthorize("isAuthenticated()")
