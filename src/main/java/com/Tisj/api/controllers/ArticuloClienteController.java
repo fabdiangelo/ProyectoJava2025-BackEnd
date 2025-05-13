@@ -2,7 +2,6 @@ package com.Tisj.api.controllers;
 
 import com.Tisj.bussines.entities.ArticuloCliente;
 import com.Tisj.services.ArticuloClienteService;
-import com.Tisj.api.pojo.ArticuloClienteDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
