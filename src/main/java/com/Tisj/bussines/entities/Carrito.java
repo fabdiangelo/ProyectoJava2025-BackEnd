@@ -16,11 +16,12 @@ import java.util.List;
 public class Carrito {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     private LocalDate vencimiento;
+    private boolean activo = true;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "carrito-articulo",
             joinColumns = @JoinColumn(name = "carrito_id"),
@@ -28,11 +29,11 @@ public class Carrito {
     )
     private List<Articulo> items;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pago_id")
     private Pago pago;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
@@ -40,15 +41,44 @@ public class Carrito {
         this.vencimiento = LocalDate.now().plusWeeks(1);
         this.items = new ArrayList<>();
         this.pago = null;
+        this.activo = true;
     }
 
-    public Boolean quitarItem(Integer id){
-        return false;
+    public Boolean quitarItem(int id){
+        if (!this.activo) return false;
+        return items.removeIf(item -> item.getId().equals(id));
     }
-    public Boolean agregarItem(Integer id){
-        return false;
+
+    public Boolean quitarElementoDelCarrito(Long articuloId) {
+        return quitarItem(articuloId.intValue());
     }
+
+    public Articulo agregarAlCarrito(Articulo articulo) {
+        if (!this.activo) return null;
+        if (articulo == null || !articulo.isActivo()) return null;
+        if (items.add(articulo)) {
+            return articulo;
+        }
+        return null;
+    }
+    
+
     public Float getMontoTotal(){
-        return (float) 0;
+        if (!this.activo) return 0f;
+        return items.stream()
+                .map(Articulo::getPrecio)
+                .reduce(0f, Float::sum);
+    }
+
+    public Float pedirMonto() {
+        return getMontoTotal();
+    }
+
+    public void desactivar() {
+        this.activo = false;
+    }
+
+    public void activar() {
+        this.activo = true;
     }
 }
