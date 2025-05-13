@@ -25,11 +25,15 @@ public class Pago {
 
     private LocalDate fechaPago;
     private Float monto;
+    private String metodoPago;
+    private String externalPaymentId;
 
-    public Pago (Usuario usuario, Float monto){
+    public Pago (Usuario usuario, Float monto, String metodoPago, String externalPaymentId){
         this.usuario = usuario;
         this.fechaPago = LocalDate.now();
         this.monto = monto;
+        this.metodoPago = metodoPago;
+        this.externalPaymentId = externalPaymentId;
     }
 
     public DTFactura realizarFacturacion(){

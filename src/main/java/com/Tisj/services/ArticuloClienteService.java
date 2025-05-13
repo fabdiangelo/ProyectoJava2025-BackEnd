@@ -1,7 +1,11 @@
 package com.Tisj.services;
 
 import com.Tisj.bussines.entities.ArticuloCliente;
+import com.Tisj.bussines.entities.Usuario;
+import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.bussines.repositories.ArticuloClienteRepository;
+import com.Tisj.bussines.repositories.UsuarioRepository;
+import com.Tisj.bussines.repositories.ArticuloRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +13,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
+import java.util.Optional;
+import com.Tisj.api.pojo.ArticuloClienteDTO;
+import java.util.stream.Collectors;
+import com.Tisj.bussines.entities.DT.DTArticuloCliente;
 
 @Service
 @Transactional
@@ -17,6 +25,12 @@ public class ArticuloClienteService {
     @Autowired
     private ArticuloClienteRepository articuloClienteRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ArticuloRepository articuloRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -24,6 +38,8 @@ public class ArticuloClienteService {
     public List<ArticuloCliente> getAllArticulosCliente() {
         List<ArticuloCliente> articulosCliente = articuloClienteRepository.findAll();
         articulosCliente.forEach(ac -> {
+            ac.actualizarEstadoPorFecha();
+            articuloClienteRepository.save(ac);
             if (ac.getArticulo() != null && ac.getArticulo().getOferta() != null) {
                 ac.getArticulo().getOferta().getArticulos().size(); // Forzar la inicialización
             }
@@ -34,14 +50,19 @@ public class ArticuloClienteService {
     @Transactional(readOnly = true)
     public ArticuloCliente getArticuloClienteById(Long id) {
         ArticuloCliente articuloCliente = articuloClienteRepository.findById(id).orElse(null);
-        if (articuloCliente != null && articuloCliente.getArticulo() != null && 
-            articuloCliente.getArticulo().getOferta() != null) {
-            articuloCliente.getArticulo().getOferta().getArticulos().size(); // Forzar la inicialización
+        if (articuloCliente != null) {
+            articuloCliente.actualizarEstadoPorFecha();
+            articuloClienteRepository.save(articuloCliente);
+            if (articuloCliente.getArticulo() != null && articuloCliente.getArticulo().getOferta() != null) {
+                articuloCliente.getArticulo().getOferta().getArticulos().size(); // Forzar la inicialización
+            }
         }
         return articuloCliente;
     }
 
     public ArticuloCliente createArticuloCliente(ArticuloCliente articuloCliente) {
+        articuloCliente.setEstado(ArticuloCliente.Estado.ACTIVO);
+        articuloCliente.setCaducidad(java.time.LocalDate.now().plusMonths(3));
         return articuloClienteRepository.save(articuloCliente);
     }
 
@@ -56,5 +77,128 @@ public class ArticuloClienteService {
 
     public void deleteArticuloCliente(Long id) {
         articuloClienteRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArticuloCliente> getArticulosClienteByUsuarioEmail(String email) {
+        List<ArticuloCliente> articulosCliente = articuloClienteRepository.findByUsuarioEmail(email);
+        articulosCliente.forEach(ac -> {
+            ac.actualizarEstadoPorFecha();
+            articuloClienteRepository.save(ac);
+            if (ac.getArticulo() != null && ac.getArticulo().getOferta() != null) {
+                ac.getArticulo().getOferta().getArticulos().size(); // Forzar la inicialización
+            }
+        });
+        return articulosCliente;
+    }
+
+    public ArticuloCliente comprarArticulo(String email, Long articuloId) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        Articulo articulo = articuloRepository.findById(articuloId).orElse(null);
+
+        if (usuario == null || articulo == null) {
+            return null;
+        }
+
+        // Verificar si ya tiene el artículo
+        if (articuloClienteRepository.existsByUsuarioAndArticulo(usuario, articulo)) {
+            return null;
+        }
+
+        ArticuloCliente articuloCliente = new ArticuloCliente(articulo, usuario);
+        articuloCliente.setEstado(ArticuloCliente.Estado.ACTIVO);
+        articuloCliente.setCaducidad(java.time.LocalDate.now().plusMonths(3));
+        return articuloClienteRepository.save(articuloCliente);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean verificarAcceso(String email, Long articuloId) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        Articulo articulo = articuloRepository.findById(articuloId).orElse(null);
+
+        if (usuario == null || articulo == null) {
+            return false;
+        }
+
+        return articuloClienteRepository.existsByUsuarioAndArticuloAndActivoTrue(usuario, articulo);
+    }
+
+    public ArticuloCliente completarArticuloCliente(Long id) {
+        ArticuloCliente articuloCliente = articuloClienteRepository.findById(id).orElse(null);
+        if (articuloCliente != null && articuloCliente.getEstado() != ArticuloCliente.Estado.CADUCADO) {
+            articuloCliente.setEstado(ArticuloCliente.Estado.COMPLETO);
+            return articuloClienteRepository.save(articuloCliente);
+        }
+        return null;
+    }
+
+    public ArticuloCliente reiniciarArticuloCliente(Long id) {
+        ArticuloCliente articuloCliente = articuloClienteRepository.findById(id).orElse(null);
+        if (articuloCliente != null) {
+            articuloCliente.reiniciar();
+            return articuloClienteRepository.save(articuloCliente);
+        }
+        return null;
+    }
+
+    public ArticuloClienteDTO toDTO(ArticuloCliente ac) {
+        return new ArticuloClienteDTO(
+            ac.getId(),
+            ac.getCaducidad(),
+            ac.getEstado().name(),
+            ac.getActivo(),
+            ac.getArticulo().getId(),
+            ac.getArticulo().getNombre(),
+            ac.getUsuario().getEmail()
+        );
+    }
+
+    public List<ArticuloClienteDTO> getArticulosClienteByUsuarioEmailDTO(String email) {
+        return getArticulosClienteByUsuarioEmail(email)
+            .stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    public ArticuloClienteDTO getArticuloClienteByIdDTO(Long id) {
+        ArticuloCliente ac = getArticuloClienteById(id);
+        return ac != null ? toDTO(ac) : null;
+    }
+
+    public DTArticuloCliente createArticuloClienteFromDTO(DTArticuloCliente dto) {
+        Articulo articulo = articuloRepository.findById(dto.articulo).orElse(null);
+        Usuario usuario = usuarioRepository.findByEmail(dto.usuario).orElse(null);
+        if (articulo == null || usuario == null) {
+            return null;
+        }
+        ArticuloCliente ac = new ArticuloCliente();
+        ac.setArticulo(articulo);
+        ac.setUsuario(usuario);
+        ac.setCaducidad(dto.caducidad);
+        ac.setEstado(ArticuloCliente.Estado.valueOf(dto.estado));
+        ac.setActivo(dto.activo != null ? dto.activo : true);
+        ArticuloCliente guardado = articuloClienteRepository.save(ac);
+        return toDT(guardado);
+    }
+
+    public List<DTArticuloCliente> getArticulosClienteByUsuarioEmailDT(String email) {
+        List<ArticuloCliente> articulosCliente = articuloClienteRepository.findByUsuarioEmail(email);
+        return articulosCliente.stream().map(this::toDT).collect(java.util.stream.Collectors.toList());
+    }
+
+    public DTArticuloCliente getArticuloClienteByIdDT(Long id) {
+        ArticuloCliente ac = articuloClienteRepository.findById(id).orElse(null);
+        return ac != null ? toDT(ac) : null;
+    }
+
+    private DTArticuloCliente toDT(ArticuloCliente ac) {
+        return new DTArticuloCliente(
+            ac.getId(),
+            ac.getCaducidad(),
+            ac.getEstado().name(),
+            ac.getActivo(),
+            ac.getArticulo().getId(),
+            ac.getUsuario().getEmail()
+        );
     }
 }
