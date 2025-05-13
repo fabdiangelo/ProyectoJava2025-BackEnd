@@ -2,8 +2,6 @@ package com.Tisj.services;
 
 import com.Tisj.api.pojo.PayPal.*;
 import com.Tisj.api.requests.RequestPago;
-import com.Tisj.api.Paypal.AuthResponse;
-import com.Tisj.api.Paypal.ClientTokenResponse;
 import com.Tisj.api.config.PayPalConfig;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -12,12 +10,15 @@ import lombok.RequiredArgsConstructor;
 import java.util.Collections;
 import java.math.BigDecimal;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class PayPalService {
     private final RestTemplate restTemplate;
     private final PayPalConfig payPalConfig;
+    private static final Logger log = LoggerFactory.getLogger(PayPalService.class);
 
     public AuthResponse authenticate() {
         HttpHeaders headers = new HttpHeaders();
@@ -92,14 +93,14 @@ public class PayPalService {
         applicationContext.setBrand_name("Solariano");
         applicationContext.setLanding_page("LOGIN");
         applicationContext.setUser_action("PAY_NOW");
-        order.setApplication_context(applicationContext);
 
+        order.setApplication_context(applicationContext);
         order.setPurchase_units(Collections.singletonList(purchaseUnit));
 
         HttpEntity<Root> request = new HttpEntity<>(order, headers);
         ResponseEntity<Root> response = restTemplate.postForEntity(
-            payPalConfig.getOrdersUrl(), 
-            request, 
+            payPalConfig.getOrdersUrl(),
+            request,
             Root.class
         );
 
@@ -115,8 +116,8 @@ public class PayPalService {
 
         HttpEntity<?> request = new HttpEntity<>(headers);
         ResponseEntity<Root> response = restTemplate.postForEntity(
-            payPalConfig.getCaptureUrl(orderId), 
-            request, 
+            payPalConfig.getCaptureUrl(orderId),
+            request,
             Root.class
         );
 
@@ -124,40 +125,43 @@ public class PayPalService {
     }
 
     public Root getOrder(String orderId) {
-        String accessToken = getAccessToken();
+        try {
+            String accessToken = getAccessToken();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<?> request = new HttpEntity<>(headers);
-        ResponseEntity<Root> response = restTemplate.getForEntity(
-            payPalConfig.getOrdersUrl() + "/" + orderId, 
-            Root.class
-        );
+            HttpEntity<?> request = new HttpEntity<>(headers);
+            ResponseEntity<Root> response = restTemplate.getForEntity(
+                payPalConfig.getOrdersUrl() + "/" + orderId,
+                Root.class
+            );
 
-        return response.getBody();
-    }
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.error("Error al obtener la orden de PayPal. Status: {}", response.getStatusCode());
+                throw new RuntimeException("Error al obtener la orden de PayPal: " + response.getStatusCode());
+            }
 
-    public Root listOrders() {
-        String accessToken = getAccessToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<?> request = new HttpEntity<>(headers);
-        ResponseEntity<Root> response = restTemplate.getForEntity(
-            payPalConfig.getOrdersUrl(), 
-            Root.class
-        );
-
-        return response.getBody();
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Error al obtener la orden de PayPal: {}", e.getMessage());
+            throw new RuntimeException("Error al obtener la orden de PayPal: " + e.getMessage());
+        }
     }
 
     private String getAccessToken() {
-        AuthResponse authResponse = authenticate();
-        return authResponse.getAccessToken();
+        try {
+            AuthResponse authResponse = authenticate();
+            if (authResponse == null || authResponse.getAccessToken() == null) {
+                log.error("No se pudo obtener el token de acceso de PayPal");
+                throw new RuntimeException("Error de autenticación con PayPal: No se pudo obtener el token de acceso");
+            }
+            return authResponse.getAccessToken();
+        } catch (Exception e) {
+            log.error("Error al autenticar con PayPal: {}", e.getMessage());
+            throw new RuntimeException("Error de autenticación con PayPal: " + e.getMessage());
+        }
     }
 }
 

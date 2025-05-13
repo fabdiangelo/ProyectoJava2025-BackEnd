@@ -19,7 +19,9 @@ public class ArticuloCliente {
     @Column(nullable = false)
     private LocalDate caducidad;
     @Column(nullable = false)
-    private Boolean completado;
+    private Boolean isCompleto;
+    @Column(nullable = false)
+    private Boolean isCaducado;
 
     @ManyToOne
     @JoinColumn(name = "articulo_id", nullable = false)
@@ -27,7 +29,18 @@ public class ArticuloCliente {
 
     public ArticuloCliente(Articulo articulo){
         this.caducidad = LocalDate.now().plusMonths(3);
-        this.completado = false;
+        this.isCompleto = false;
+        this.isCaducado = false;
         this.articulo = articulo;
+    }
+
+    public void reiniciar() {
+        this.isCompleto = false;
+        this.isCaducado = false;
+        this.caducidad = LocalDate.now().plusMonths(3);
+    }
+
+    public void caducar() {
+        this.isCaducado = true;
     }
 }

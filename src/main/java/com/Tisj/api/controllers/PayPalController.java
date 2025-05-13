@@ -2,8 +2,6 @@ package com.Tisj.api.controllers;
 import com.Tisj.api.requests.RequestPago;
 import com.Tisj.api.pojo.PayPal.Root;
 import com.Tisj.services.PayPalService;
-import com.Tisj.api.Paypal.AuthResponse;
-import com.Tisj.api.Paypal.ClientTokenResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +26,7 @@ public class PayPalController {
                 .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))
         ) {
             try {
-                AuthResponse authResponse = payPalService.authenticate();
+                com.Tisj.api.pojo.PayPal.AuthResponse authResponse = payPalService.authenticate();
                 return ResponseEntity.ok(authResponse);
             } catch (Exception e) {
                 log.error("Error en la autenticación con PayPal: {}", e.getMessage());
@@ -92,7 +90,7 @@ public class PayPalController {
                 .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))
         ) {
             try {
-                ClientTokenResponse tokenResponse = payPalService.getClientToken();
+                com.Tisj.api.pojo.PayPal.ClientTokenResponse tokenResponse = payPalService.getClientToken();
                 return ResponseEntity.ok(tokenResponse);
             } catch (Exception e) {
                 log.error("Error al obtener el token del cliente: {}", e.getMessage());
