@@ -362,3 +362,13 @@ Post /api/orders
   "returnUrl": "https://tu-dominio.com/success",
   "cancelUrl": "https://tu-dominio.com/cancel"
 }
+
+Post /api/articulo_cliente/usuario
+{
+  "id": 0,
+  "caducidad": "2025-08-01",
+  "estado": "ACTIVO",
+  "activo": true,
+  "articulo": 123,
+  "usuario": "usuario@ejemplo.com"
+}

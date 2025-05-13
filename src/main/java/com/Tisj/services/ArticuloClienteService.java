@@ -11,16 +11,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
-import com.Tisj.api.pojo.ArticuloClienteDTO;
 import java.util.stream.Collectors;
 import com.Tisj.bussines.entities.DT.DTArticuloCliente;
 
 @Service
 @Transactional
 public class ArticuloClienteService {
+
+    private static final Logger log = LoggerFactory.getLogger(ArticuloClienteService.class);
 
     @Autowired
     private ArticuloClienteRepository articuloClienteRepository;
@@ -141,57 +143,7 @@ public class ArticuloClienteService {
         return null;
     }
 
-    public ArticuloClienteDTO toDTO(ArticuloCliente ac) {
-        return new ArticuloClienteDTO(
-            ac.getId(),
-            ac.getCaducidad(),
-            ac.getEstado().name(),
-            ac.getActivo(),
-            ac.getArticulo().getId(),
-            ac.getArticulo().getNombre(),
-            ac.getUsuario().getEmail()
-        );
-    }
-
-    public List<ArticuloClienteDTO> getArticulosClienteByUsuarioEmailDTO(String email) {
-        return getArticulosClienteByUsuarioEmail(email)
-            .stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
-    }
-
-    public ArticuloClienteDTO getArticuloClienteByIdDTO(Long id) {
-        ArticuloCliente ac = getArticuloClienteById(id);
-        return ac != null ? toDTO(ac) : null;
-    }
-
-    public DTArticuloCliente createArticuloClienteFromDTO(DTArticuloCliente dto) {
-        Articulo articulo = articuloRepository.findById(dto.articulo).orElse(null);
-        Usuario usuario = usuarioRepository.findByEmail(dto.usuario).orElse(null);
-        if (articulo == null || usuario == null) {
-            return null;
-        }
-        ArticuloCliente ac = new ArticuloCliente();
-        ac.setArticulo(articulo);
-        ac.setUsuario(usuario);
-        ac.setCaducidad(dto.caducidad);
-        ac.setEstado(ArticuloCliente.Estado.valueOf(dto.estado));
-        ac.setActivo(dto.activo != null ? dto.activo : true);
-        ArticuloCliente guardado = articuloClienteRepository.save(ac);
-        return toDT(guardado);
-    }
-
-    public List<DTArticuloCliente> getArticulosClienteByUsuarioEmailDT(String email) {
-        List<ArticuloCliente> articulosCliente = articuloClienteRepository.findByUsuarioEmail(email);
-        return articulosCliente.stream().map(this::toDT).collect(java.util.stream.Collectors.toList());
-    }
-
-    public DTArticuloCliente getArticuloClienteByIdDT(Long id) {
-        ArticuloCliente ac = articuloClienteRepository.findById(id).orElse(null);
-        return ac != null ? toDT(ac) : null;
-    }
-
-    private DTArticuloCliente toDT(ArticuloCliente ac) {
+    public DTArticuloCliente toDTO(ArticuloCliente ac) {
         return new DTArticuloCliente(
             ac.getId(),
             ac.getCaducidad(),
@@ -200,5 +152,61 @@ public class ArticuloClienteService {
             ac.getArticulo().getId(),
             ac.getUsuario().getEmail()
         );
+    }
+
+    public List<DTArticuloCliente> getArticulosClienteByUsuarioEmailDTO(String email) {
+        return getArticulosClienteByUsuarioEmail(email)
+            .stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    public DTArticuloCliente getArticuloClienteByIdDTO(Long id) {
+        ArticuloCliente ac = getArticuloClienteById(id);
+        return ac != null ? toDTO(ac) : null;
+    }
+
+    public DTArticuloCliente createArticuloClienteFromDTO(DTArticuloCliente dto) {
+        if (dto.articulo == null) {
+            log.warn("ID de artículo no proporcionado");
+            throw new IllegalArgumentException("ID de artículo no proporcionado");
+        }
+        if (dto.usuario == null || dto.usuario.isBlank()) {
+            log.warn("Email de usuario no proporcionado");
+            throw new IllegalArgumentException("Email de usuario no proporcionado");
+        }
+        Articulo articulo = articuloRepository.findById(dto.articulo).orElse(null);
+        if (articulo == null) {
+            log.warn("Artículo no encontrado con id: {}", dto.articulo);
+            throw new IllegalArgumentException("Artículo no encontrado con id: " + dto.articulo);
+        }
+        Usuario usuario = usuarioRepository.findByEmail(dto.usuario).orElse(null);
+        if (usuario == null) {
+            log.warn("Usuario no encontrado con email: {}", dto.usuario);
+            throw new IllegalArgumentException("Usuario no encontrado con email: " + dto.usuario);
+        }
+        ArticuloCliente ac = new ArticuloCliente();
+        ac.setArticulo(articulo);
+        ac.setUsuario(usuario);
+        ac.setCaducidad(dto.caducidad);
+        try {
+            ac.setEstado(ArticuloCliente.Estado.valueOf(dto.estado));
+        } catch (Exception e) {
+            log.warn("Estado inválido: {}", dto.estado);
+            throw new IllegalArgumentException("Estado inválido: " + dto.estado + ". Debe ser ACTIVO, COMPLETO o CADUCADO.");
+        }
+        ac.setActivo(dto.activo != null ? dto.activo : true);
+        ArticuloCliente guardado = articuloClienteRepository.save(ac);
+        return toDTO(guardado);
+    }
+
+    public List<DTArticuloCliente> getArticulosClienteByUsuarioEmailDT(String email) {
+        List<ArticuloCliente> articulosCliente = articuloClienteRepository.findByUsuarioEmail(email);
+        return articulosCliente.stream().map(this::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    public DTArticuloCliente getArticuloClienteByIdDT(Long id) {
+        ArticuloCliente ac = articuloClienteRepository.findById(id).orElse(null);
+        return ac != null ? toDTO(ac) : null;
     }
 }
