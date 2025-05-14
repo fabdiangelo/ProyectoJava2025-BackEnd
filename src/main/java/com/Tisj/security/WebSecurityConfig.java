@@ -56,8 +56,10 @@ public class WebSecurityConfig {
                         // .allowCredentials(true) //solo si usan cookies
                         .allowedMethods("GET","POST")
                         .allowedHeaders("*")
-                        //.allowedOrigins("http://localhost:4200", "");
-                        .allowedOriginPatterns("http://localhost*");
+                        .allowedOriginPatterns(
+                            "http://localhost:*",                         // cualquier puerto en localhost
+                            "https://solfuentes-prueba.netlify.app"      // tu frontend en producción
+                );
             }
         };
     }
