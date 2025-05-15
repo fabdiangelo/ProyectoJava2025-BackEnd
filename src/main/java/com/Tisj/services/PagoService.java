@@ -9,6 +9,7 @@ import com.Tisj.bussines.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import com.Tisj.api.requests.PagoCaptureRequest;
 
 import java.util.List;
 import java.time.LocalDate;
@@ -139,5 +140,33 @@ public class PagoService {
             log.error("Error al capturar el pago de PayPal: {}", e.getMessage());
             throw new RuntimeException("Error al capturar el pago: " + e.getMessage());
         }
+    }
+
+    public void registrarPago(PagoCaptureRequest request) {
+        // Buscar el usuario por email
+        Usuario usuario = usuarioRepository.findByEmail(request.getUsuario()).orElse(null);
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado: " + request.getUsuario());
+        }
+        // Buscar si ya existe un pago con ese paymentId
+        Pago pago = pagoRepository.findByExternalPaymentId(request.getPaymentId()).orElse(null);
+        if (pago == null) {
+            // Crear nuevo pago
+            pago = new Pago();
+            pago.setUsuario(usuario);
+            pago.setExternalPaymentId(request.getPaymentId());
+            pago.setMetodoPago("PAYPAL");
+            pago.setFechaPago(java.time.LocalDate.now());
+        }
+        pago.setEstado(request.getStatus());
+        pagoRepository.save(pago);
+    }
+
+    public String capturarEstadoOrdenPayPal(String orderId) {
+        Root capturedOrder = payPalService.captureOrder(orderId);
+        if (capturedOrder == null) {
+            throw new RuntimeException("No se pudo capturar la orden");
+        }
+        return capturedOrder.getStatus();
     }
 }

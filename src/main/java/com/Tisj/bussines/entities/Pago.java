@@ -27,6 +27,7 @@ public class Pago {
     private Float monto;
     private String metodoPago;
     private String externalPaymentId;
+    private String estado; // Estado del pago: APROBADO, CANCELADO, FALLIDO, etc.
 
     public Pago (Usuario usuario, Float monto, String metodoPago, String externalPaymentId){
         this.usuario = usuario;
@@ -48,5 +49,13 @@ public class Pago {
 
     public TokenPago generarTokenPago() {
         return new TokenPago(this);
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

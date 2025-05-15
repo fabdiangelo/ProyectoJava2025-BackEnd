@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.Tisj.api.requests.PagoCaptureRequest;
 
 import java.util.List;
 
@@ -106,46 +107,25 @@ public class PagoController {
 
     @PostMapping("/paypal/{orderId}/capture")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> procesarPagoPayPal(@PathVariable String orderId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))
-        ) {
-            try {
-                log.info("Procesando pago de PayPal para orden: {}", orderId);
-                DTFactura factura = pagoService.capturarOrdenPayPal(orderId);
-                if (factura != null) {
-                    log.info("Pago procesado exitosamente para orden: {}. Monto: {}, Fecha: {}", 
-                        orderId, 
-                        factura.getMonto(),
-                        factura.getFecha());
-                    return ResponseEntity.ok(factura);
-                } else {
-                    log.error("No se pudo procesar el pago para la orden: {}", orderId);
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("No se pudo procesar el pago");
-                }
-            } catch (Exception e) {
-                log.error("Error al procesar el pago de PayPal: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error al procesar el pago: " + e.getMessage());
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("No tiene permisos para realizar esta operación");
+    public ResponseEntity<String> capturarEstadoPagoPayPal(@PathVariable String orderId) {
+        try {
+            String estado = pagoService.capturarEstadoOrdenPayPal(orderId);
+            return ResponseEntity.ok(estado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al capturar el estado del pago: " + e.getMessage());
         }
     }
 
-    @PostMapping("/paypal/webhook")
-    public ResponseEntity<?> webhookPayPal(@RequestBody String payload) {
+    @PostMapping("/captura")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> capturarPago(@RequestBody PagoCaptureRequest request) {
         try {
-            log.info("Recibido webhook de PayPal: {}", payload);
-            // TODO: Implementar procesamiento del webhook
-            return ResponseEntity.ok().build();
+            pagoService.registrarPago(request);
+            return ResponseEntity.ok("Pago registrado con estado: " + request.getStatus());
         } catch (Exception e) {
-            log.error("Error al procesar webhook de PayPal: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al procesar webhook");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al registrar el pago: " + e.getMessage());
         }
     }
+
 }
