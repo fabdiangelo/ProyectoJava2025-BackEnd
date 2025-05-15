@@ -56,6 +56,59 @@ public class VideoController {
         }
     }
 
+    @GetMapping("/{id}/youtube")
+    public ResponseEntity<?> getYoutubeVideo(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            Video video = videoService.getVideoById(id);
+            if (video != null) {
+                String videoId = videoService.extractVideoId(video.getLink());
+                if (videoId != null) {
+                    try {
+                        YoutubeVideoDetails videoDetails = youtubeService.getVideoDetails(videoId);
+                        return new ResponseEntity<>(videoDetails, HttpStatus.OK);
+                    } catch (YoutubeApiException e) {
+                        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                }
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    @GetMapping("/{id}/youtube/info")
+    public ResponseEntity<?> getYoutubeVideoInfo(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+            Video video = videoService.getVideoById(id);
+            if (video != null) {
+                String videoId = videoService.extractVideoId(video.getLink());
+                if (videoId != null) {
+                    try {
+                        YoutubeVideoDetails videoDetails = youtubeService.getVideoDetails(videoId);
+                        if (videoDetails.getItems() != null && !videoDetails.getItems().isEmpty()) {
+                            var item = videoDetails.getItems().get(0);
+                            var info = new VideoInfo(
+                                item.getSnippet().getTitle(),
+                                item.getSnippet().getDescription()
+                            );
+                            return new ResponseEntity<>(info, HttpStatus.OK);
+                        }
+                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    } catch (YoutubeApiException e) {
+                        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                }
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
 
     @PostMapping
     public ResponseEntity<Video> createVideo(@RequestBody Video video) {
@@ -63,25 +116,28 @@ public class VideoController {
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
             try {
+                if (video.getCurso() == null || video.getCurso().getId() == null) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
                 String videoId = videoService.extractVideoId(video.getLink());
                 if (videoId == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Or a more specific error
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
                 YoutubeVideoDetails videoDetails = youtubeService.getVideoDetails(videoId);
                 if (videoDetails.getItems() != null && !videoDetails.getItems().isEmpty()) {
                     video.setNombre(videoDetails.getItems().get(0).getSnippet().getTitle());
                     video.setDescripcion(videoDetails.getItems().get(0).getSnippet().getDescription());
-                    // Assuming you have a way to get duration from YoutubeVideoDetails
-                    // video.setDuracion(...);
+                    video.setLink(videoService.buildYoutubeUrl(videoId));
                 }
                 Video nuevoVideo = videoService.createVideo(video);
                 return new ResponseEntity<>(nuevoVideo, HttpStatus.CREATED);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             } catch (YoutubeApiException e) {
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Or a more specific error
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @DeleteMapping("/{id}")
@@ -93,6 +149,25 @@ public class VideoController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    // Clase interna para la respuesta
+    private static class VideoInfo {
+        private final String title;
+        private final String description;
+
+        public VideoInfo(String title, String description) {
+            this.title = title;
+            this.description = description;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
         }
     }
 }

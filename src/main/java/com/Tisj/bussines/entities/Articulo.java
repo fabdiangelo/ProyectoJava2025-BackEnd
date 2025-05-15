@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class Articulo {
     private Oferta oferta;
 
     private boolean activo = true;
+
+    @OneToMany(mappedBy = "articulo")
+    @JsonBackReference
+    private List<ArticuloCliente> articuloClientes;
 
     public Articulo (String nombre, String descripcion, Float precio, String videoPresentacion){
         this.nombre = nombre;

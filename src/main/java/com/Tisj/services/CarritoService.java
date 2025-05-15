@@ -1,50 +1,119 @@
 package com.Tisj.services;
 
 import com.Tisj.bussines.entities.Carrito;
+import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.bussines.repositories.CarritoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class CarritoService {
 
     @Autowired
     private CarritoRepository carritoRepository;
 
+    @Autowired
+    private ArticuloService articuloService;
+
     public Carrito createCarrito(Carrito carrito) {
-        return carritoRepository.save(carrito); // Crear un nuevo carrito
+        carrito.setActivo(true);
+        return carritoRepository.save(carrito);
     }
 
+    @Transactional(readOnly = true)
     public Carrito getCarritoById(Long id) {
-        return carritoRepository.findById(id).orElse(null); // Obtener un carrito por su ID
+        Carrito carrito = carritoRepository.findById(id)
+                .filter(Carrito::isActivo)
+                .orElse(null);
+        if (carrito != null) {
+            // Inicializar la colección items
+            carrito.getItems().size();
+        }
+        return carrito;
     }
 
+    @Transactional(readOnly = true)
     public List<Carrito> getAllCarritos() {
-        return carritoRepository.findAll(); // Obtener todos los carritos
+        List<Carrito> carritos = carritoRepository.findAll().stream()
+                .filter(Carrito::isActivo)
+                .toList();
+        // Inicializar las colecciones items
+        carritos.forEach(carrito -> carrito.getItems().size());
+        return carritos;
     }
-
-    // public Carrito updateCarrito(Long id, Carrito carrito) {
-    //     if (carritoRepository.existsById(id)) {
-    //         carrito.setId(id);
-    //         return carritoRepository.save(carrito); // Actualizar un carrito existente
-    //     }
-    //     return null;
-    // }
 
     public void deleteCarrito(Long id) {
-        if (carritoRepository.existsById(id)) {
-            carritoRepository.deleteById(id); // Eliminar un carrito por su ID
+        Carrito carrito = getCarritoById(id);
+        if (carrito != null) {
+            carrito.setActivo(false);
+            carritoRepository.save(carrito);
         }
     }
 
+    @Transactional(readOnly = true)
     public Carrito getCarritoByUsuarioEmail(String email) {
-        return carritoRepository.findByUsuarioEmail(email).orElse(null); // Obtener un carrito por el email del usuario
+        Carrito carrito = carritoRepository.findByUsuarioEmail(email)
+                .filter(Carrito::isActivo)
+                .orElse(null);
+        if (carrito != null) {
+            // Inicializar la colección items
+            carrito.getItems().size();
+        }
+        return carrito;
     }
 
-    public Object updateCarrito(Long id, Carrito carrito) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateCarrito'");
+    @Transactional
+    public Carrito agregarItemAlCarrito(Long carritoId, Long articuloId) {
+        Carrito carrito = getCarritoById(carritoId);
+        Articulo articulo = articuloService.getArticuloById(articuloId);
+        if (carrito != null && articulo != null && carrito.isActivo()) {
+            Articulo agregado = carrito.agregarAlCarrito(articulo);
+            if (agregado != null) {
+                return carritoRepository.save(carrito);
+            }
+        }
+        return null;
+    }
+
+    @Transactional
+    public Carrito quitarItemDelCarrito(Long carritoId, Long articuloId) {
+        Carrito carrito = getCarritoById(carritoId);
+        if (carrito != null && carrito.isActivo()) {
+            Boolean quitado = carrito.quitarElementoDelCarrito(articuloId);
+            if (quitado) {
+                return carritoRepository.save(carrito);
+            }
+        }
+        return null;
+    }
+
+    @Transactional
+    public Carrito desactivarCarrito(Long carritoId) {
+        Carrito carrito = getCarritoById(carritoId);
+        if (carrito != null) {
+            carrito.desactivar();
+            return carritoRepository.save(carrito);
+        }
+        return null;
+    }
+
+    @Transactional
+    public Carrito activarCarrito(Long carritoId) {
+        Carrito carrito = carritoRepository.findById(carritoId).orElse(null);
+        if (carrito != null) {
+            carrito.activar();
+            return carritoRepository.save(carrito);
+        }
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public Float getMontoTotalCarrito(Long carritoId) {
+        Carrito carrito = getCarritoById(carritoId);
+        return carrito != null && carrito.isActivo() ? carrito.pedirMonto() : 0f;
     }
 }

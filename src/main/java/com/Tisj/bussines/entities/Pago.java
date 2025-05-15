@@ -25,11 +25,16 @@ public class Pago {
 
     private LocalDate fechaPago;
     private Float monto;
+    private String metodoPago;
+    private String externalPaymentId;
+    private String estado; // Estado del pago: APROBADO, CANCELADO, FALLIDO, etc.
 
-    public Pago (Usuario usuario, Float monto){
+    public Pago (Usuario usuario, Float monto, String metodoPago, String externalPaymentId){
         this.usuario = usuario;
         this.fechaPago = LocalDate.now();
         this.monto = monto;
+        this.metodoPago = metodoPago;
+        this.externalPaymentId = externalPaymentId;
     }
 
     public DTFactura realizarFacturacion(){
@@ -44,5 +49,13 @@ public class Pago {
 
     public TokenPago generarTokenPago() {
         return new TokenPago(this);
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

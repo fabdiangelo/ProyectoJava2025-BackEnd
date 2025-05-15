@@ -2,6 +2,7 @@ package com.Tisj.api.controllers;
 
 import com.Tisj.bussines.entities.Pago;
 import com.Tisj.services.PagoService;
+import com.Tisj.bussines.entities.DT.DTFactura;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.Tisj.api.requests.PagoCaptureRequest;
 
 import java.util.List;
 
@@ -102,4 +104,28 @@ public class PagoController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
+
+    @PostMapping("/paypal/{orderId}/capture")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> capturarEstadoPagoPayPal(@PathVariable String orderId) {
+        try {
+            String estado = pagoService.capturarEstadoOrdenPayPal(orderId);
+            return ResponseEntity.ok(estado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al capturar el estado del pago: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/captura")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> capturarPago(@RequestBody PagoCaptureRequest request) {
+        try {
+            pagoService.registrarPago(request);
+            return ResponseEntity.ok("Pago registrado con estado: " + request.getStatus());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al registrar el pago: " + e.getMessage());
+        }
+    }
+
 }
