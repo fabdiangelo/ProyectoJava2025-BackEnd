@@ -3,12 +3,14 @@ version: '3.8'
 services:
   app:
     build: .
+    image: fabdiangelo/testapp:latest
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL
-      - DB_PASSWORD
-      - CORREO
-      - APP_PASSWD_GMAIL
-      - YOUTUBE_API_KEY
-      - SECRET_KEY
+      - DB_PASSWORD=${DB_PASSWORD}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+      - MP_PUBLIC_KEY=${MP_PUBLIC_KEY}
+      - MP_ACCESS_TOKEN=${MP_ACCESS_TOKEN}
