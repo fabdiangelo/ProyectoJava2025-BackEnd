@@ -18,7 +18,7 @@ public class MercadoPagoService {
                 .title("Producto de prueba")
                 .quantity(1)
                 .unitPrice(new BigDecimal("100.00"))
-                .currencyId("UYU") // o ARS según tu país
+                .currencyId("UYU")
                 .build();
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()

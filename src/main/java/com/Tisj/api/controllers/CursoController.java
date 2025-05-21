@@ -45,18 +45,18 @@ public class CursoController {
 
     @GetMapping
     public ResponseEntity<List<Curso>> getCursos() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
-                        || p.getAuthority().equals("USER")))) {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        if (auth.getAuthorities().stream()
+//                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
+//                        || p.getAuthority().equals("USER")))) {
             List<Curso> cursos = cursoService.getAllCursos();
             if (cursos.isEmpty()){
                 return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
             }
             return new ResponseEntity<>(cursos, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//        }
     }
 
     @GetMapping("/{id}")
