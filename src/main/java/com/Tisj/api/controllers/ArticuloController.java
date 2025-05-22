@@ -20,17 +20,17 @@ public class ArticuloController {
     @Autowired
     private ArticuloService articuloService;
 
-    @PutMapping("/{id}")
+   @PutMapping("/{id}")
     public ResponseEntity<Articulo> updateArticulo(@PathVariable Long id, @RequestBody Articulo articulo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        Articulo articuloActualizado = articuloService.updateArticulo(id, articulo);
-        if (articuloActualizado != null) {
-            return new ResponseEntity<>(articuloActualizado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+                .anyMatch(p -> p.getAuthority().equals("ADMIN") || p.getAuthority().equals("USER"))) {
+            Articulo articuloActualizado = articuloService.updateArticulo(id, articulo);
+            if (articuloActualizado != null) {
+                return new ResponseEntity<>(articuloActualizado, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -40,11 +40,12 @@ public class ArticuloController {
     public ResponseEntity<Void> deleteArticulo(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-        articuloService.deleteArticulo(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                .anyMatch(p -> p.getAuthority().equals("ADMIN") || p.getAuthority().equals("USER"))) {
+            articuloService.deleteArticulo(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
+
 }

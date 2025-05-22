@@ -34,9 +34,14 @@ public class ArticuloClienteController {
     @GetMapping("/usuario/mis-cursos")
     public ResponseEntity<List<DTArticuloCliente>> getMisCursosUsuario() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        // Solo usuarios activos pueden ver sus cursos
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null || usuario.getActivo() == null || !usuario.getActivo()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
-            String email = auth.getName();
             List<DTArticuloCliente> misCursos = articuloClienteService.getArticulosClienteByUsuarioEmailDT(email);
             return new ResponseEntity<>(misCursos, HttpStatus.OK);
         }

@@ -372,3 +372,61 @@ Post /api/articulo_cliente/usuario
   "articulo": 123,
   "usuario": "usuario@ejemplo.com"
 }
+
+
+{
+  "nombre": "Curso de prueba",
+  "descripcion": "Curso de prueba para para la plataforma, los videos fueron tomados con fines de testing seran removidos en brebe",
+  "precio": 5,
+  "videoPresentacion": "https://www.youtube.com/watch?v=8xIplL-WUlU",
+  "duracionTotal": 20,
+  "edadObj": 16,
+  "generoObj": "Unisex",
+  "pdf": "https://tusitio.com/materiales/java-fundamentos.pdf",
+  "ofertaId": 1,
+  "videos": [
+    {
+      "nombre": "cancion creada para testear videos cortos",
+      "descripcion": "Cancion de Juno Hare",
+      "link": "https://www.youtube.com/watch?v=ki3PCVYrvqk"
+    },
+    {
+      "nombre": "Video largo para testear diferentes videos",
+      "descripcion": "video de Triline",
+      "link": "https://www.youtube.com/watch?v=zbXWe0uAmZQ"
+    }
+  ]
+}
+
+{
+  "id": 0,
+  "caducidad": "2025-08-01",
+  "estado": "ACTIVO",
+  "activo": true,
+  "articulo": 1002,
+  "usuario": "usuario@ejemplo.com"
+}
+
+{
+  "nombre": "Curso de prueba",
+  "descripcion": "Curso de prueba para para la plataforma, los videos fueron tomados con fines de testing seran removidos en brebe",
+  "precio": 5,
+  "videoPresentacion": "https://www.youtube.com/watch?v=8xIplL-WUlU",
+  "duracionTotal": 20,
+  "edadObj": 16,
+  "generoObj": "Unisex",
+  "pdf": "https://tusitio.com/materiales/java-fundamentos.pdf",
+  "ofertaId": 1,
+  "videos": [
+    {
+      "nombre": "cancion creada para testear videos cortos",
+      "descripcion": "Cancion de Juno Hare",
+      "link": "https://www.youtube.com/watch?v=ki3PCVYrvqk"
+    },
+    {
+      "nombre": "Video largo para testear diferentes videos",
+      "descripcion": "video de Triline",
+      "link": "https://www.youtube.com/watch?v=zbXWe0uAmZQ"
+    }
+  ]
+}
