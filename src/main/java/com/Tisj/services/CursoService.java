@@ -113,4 +113,8 @@ public class CursoService {
         }
         return null;
     }
+
+    public Curso getCursoByNombre(String nombre) {
+        return cursoRepository.findByNombre(nombre);
+    }
 }

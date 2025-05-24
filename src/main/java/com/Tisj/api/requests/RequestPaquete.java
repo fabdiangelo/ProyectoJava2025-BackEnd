@@ -12,5 +12,5 @@ public class RequestPaquete {
     private String descripcion;
     private Float precio;
     private String videoPresentacion;
-    private List<Long> cursoIds;
+    private List<String> cursos;
 }

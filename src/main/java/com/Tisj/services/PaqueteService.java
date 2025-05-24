@@ -43,9 +43,9 @@ public class PaqueteService {
     }
 
     public Paquete reqToPaquete(RequestPaquete reqPaquete) {
-        List<Curso> cursos = reqPaquete.getCursoIds()
+        List<Curso> cursos = reqPaquete.getCursos()
                 .stream()
-                .map(id -> cursoService.getCursoById(id))
+                .map(nombre -> cursoService.getCursoByNombre(nombre))
                 .toList();
 
         if(cursos.stream().anyMatch(Objects::isNull)){
