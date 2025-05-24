@@ -1,11 +1,6 @@
 package com.Tisj.bussines.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +18,8 @@ public class Video {
     private Long id;
 
     private String nombre;
+
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
     private Float duracion;
     private String link;

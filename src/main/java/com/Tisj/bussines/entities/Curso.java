@@ -16,9 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 public class Curso extends Articulo{
     private Integer duracionTotal;
-    private String pdf;
-    private Integer edadObj;
-    private String generoObj;
 
     @ManyToMany(mappedBy = "cursos")
     @JsonIgnore
@@ -27,13 +24,10 @@ public class Curso extends Articulo{
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Video> videos = new ArrayList<>();
 
-    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion, Integer duracionTotal, Integer edadObj, String generoObj, String pdf, List<Video> videos){
+    public Curso (String nombre, String descripcion, Float precio, String videoPresentacion){
         super(nombre, descripcion, precio, videoPresentacion);
-        this.duracionTotal = duracionTotal;
-        this.edadObj = edadObj;
-        this.generoObj = generoObj;
-        this.pdf = pdf;
+        this.duracionTotal = 0;
         this.paquetes = new ArrayList<>();
-        this.videos = videos;
+        this.videos = new ArrayList<>();
     }
 }

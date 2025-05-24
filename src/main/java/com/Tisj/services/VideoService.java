@@ -51,8 +51,7 @@ public class VideoService {
         if (videoId != null) {
             video.setLink(buildYoutubeUrl(videoId));
         }
-        video.setActivo(true);
-        return videoRepository.save(video);
+        return video;
     }
 
     public boolean deleteVideo(Long id) {
@@ -99,5 +98,9 @@ public class VideoService {
             return null;
         }
         return String.format("https://www.youtube.com/watch?v=%s", videoId);
+    }
+
+    public void save(Video video) {
+        videoRepository.save(video);
     }
 }

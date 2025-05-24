@@ -65,14 +65,8 @@ public class CursoService {
             reqCurso.getNombre(),
             reqCurso.getDescripcion(),
             reqCurso.getPrecio(),
-            reqCurso.getVideoPresentacion(),
-            reqCurso.getDuracionTotal(),
-            reqCurso.getEdadObj(),
-            reqCurso.getGeneroObj(),
-            reqCurso.getPdf(),
-            new ArrayList<>()
+            reqCurso.getVideoPresentacion()
         );
-        curso.setActivo(true);
 
         // Guardar el curso para obtener el ID
         curso = cursoRepository.save(curso);
@@ -87,6 +81,7 @@ public class CursoService {
                 requestVideo.getLink()
             );
             video.setCurso(curso); // Asignar el curso al video
+            videoService.save(video);
             video = videoService.createVideo(video);
             videos.add(video);
         }

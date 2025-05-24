@@ -31,7 +31,7 @@ public class Articulo {
     @JoinColumn(name = "oferta_id")
     private Oferta oferta;
 
-    private boolean activo = true;
+    private boolean activo;
 
     @OneToMany(mappedBy = "articulo")
     @JsonBackReference

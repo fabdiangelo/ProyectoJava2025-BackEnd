@@ -50,6 +50,7 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher("/configuration/**")).permitAll()
 
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/curso")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/webhook")).permitAll()
 
                         .anyRequest()
                         .authenticated());

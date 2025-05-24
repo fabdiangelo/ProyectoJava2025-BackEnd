@@ -14,10 +14,5 @@ public class RequestCurso {
     private String descripcion;
     private Float precio;
     private String videoPresentacion;
-    private Integer duracionTotal;
-    private Integer edadObj;
-    private String generoObj;
-    private String pdf;
-    private Long ofertaId;
     private List<RequestVideo> videos;
 }
