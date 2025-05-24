@@ -71,8 +71,6 @@ public class UsuarioService {
             user.setPassword(changes.getPassword());
             user.setNombre(changes.getNombre());
             user.setApellido(changes.getApellido());
-            user.setGenero(changes.getGenero());
-            user.setNacimiento(changes.getNacimiento());
             user.setActivo(changes.getActivo());
             response = "Cliente modificado: " + usuarioRepository.save(user).getEmail();
         }
@@ -98,10 +96,7 @@ public class UsuarioService {
                 req.getEmail(),
                 req.getPassword(),
                 req.getNombre(),
-                req.getApellido(),
-                req.getGenero(),
-                req.getNacimiento(),
-                req.getActivo()
+                req.getApellido()
         );
     }
 }

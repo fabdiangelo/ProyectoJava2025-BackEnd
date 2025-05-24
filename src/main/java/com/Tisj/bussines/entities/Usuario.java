@@ -21,8 +21,6 @@ public class Usuario {
     private String password;
     private String nombre;
     private String apellido;
-    private char genero;
-    private LocalDate nacimiento;
     private Boolean activo;
 
     @ManyToMany (fetch = FetchType.EAGER)
@@ -39,14 +37,12 @@ public class Usuario {
     @OneToMany (mappedBy = "usuario")
     private List<Pago> pagos;
 
-    public Usuario(String email, String password, String nombre, String apellido, char genero, LocalDate nacimiento, Boolean activo){
+    public Usuario(String email, String password, String nombre, String apellido){
         this.email = email;
         this.password = password;
         this.nombre = nombre;
         this.apellido = apellido;
-        this.genero = genero;
-        this.nacimiento = nacimiento;
-        this.activo = activo;
+        this.activo = true;
 
         this.roles = new ArrayList<>();
         this.articulos = new ArrayList<>();
@@ -57,7 +53,7 @@ public class Usuario {
         List<String> rolesStr = this.roles.stream()
                 .map(RolUsuario::getNombre)
                 .toList();
-        return new DTUsuario(email, nombre, apellido, genero, nacimiento, activo, rolesStr);
+        return new DTUsuario(email, nombre, apellido, activo, rolesStr);
     }
 
     @Override
