@@ -430,3 +430,13 @@ Post /api/articulo_cliente/usuario
     }
   ]
 }
+
+
+{
+  "id": 0,
+  "caducidad": "2025-09-01",
+  "estado": "ACTIVO",
+  "activo": true,
+  "articulo": 1353,
+  "usuario": "admin"
+}
