@@ -4,6 +4,7 @@ import com.Tisj.bussines.entities.Carrito;
 import com.Tisj.bussines.entities.DT.DTCarrito;
 import com.Tisj.api.requests.RequestCarrito;
 import com.Tisj.services.CarritoService;
+import com.Tisj.bussines.repositories.UsuarioRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,12 @@ public class CarritoController {
     @Autowired
     private CarritoService carritoService;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    // Todo: Chequear que el carrito no exista un carrito asignado a usuario, si no es asi, crear uno y asignarlo.
     @PostMapping
-    public ResponseEntity<DTCarrito> crearCarrito(@Valid @RequestBody(required = false) RequestCarrito request) {
+    public ResponseEntity<DTCarrito> crearCarrito(@Valid @RequestBody RequestCarrito request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
@@ -41,19 +46,28 @@ public class CarritoController {
 
                 // Crear nuevo carrito
                 Carrito nuevoCarrito = new Carrito();
+                nuevoCarrito.setUsuario(usuarioRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado")));
+
+                // Primero crear y guardar el carrito para obtener el ID
+                DTCarrito carritoCreado = carritoService.createCarrito(nuevoCarrito);
+
+                // Luego agregar los items si se proporcionan
                 if (request != null && request.getItemIds() != null) {
                     request.getItemIds().forEach(itemId -> {
                         try {
-                            carritoService.agregarItemAlCarrito(nuevoCarrito.getId(), itemId);
+                            carritoService.agregarItemAlCarrito(carritoCreado.getId(), itemId);
                         } catch (Exception e) {
                             log.error("Error al agregar item {} al carrito: {}", itemId, e.getMessage());
                         }
                     });
                 }
-                
-                DTCarrito carritoCreado = carritoService.createCarrito(nuevoCarrito);
+
+                // Obtener el carrito actualizado con los items agregados
+                DTCarrito carritoFinal = carritoService.getCarritoById(carritoCreado.getId());
+
                 log.info("Nuevo carrito creado para usuario: {}", email);
-                return ResponseEntity.status(HttpStatus.CREATED).body(carritoCreado);
+                return ResponseEntity.status(HttpStatus.CREATED).body(carritoFinal);
             } catch (Exception e) {
                 log.error("Error al crear carrito para usuario {}: {}", email, e.getMessage());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -232,12 +246,22 @@ public class CarritoController {
             try {
                 DTCarrito carrito = carritoService.getCarritoByUsuarioEmail(emailUsuarioLogueado);
                 if (carrito != null) {
+                    log.info("Carrito existente encontrado para usuario: {}", emailUsuarioLogueado);
                     return new ResponseEntity<>(carrito, HttpStatus.OK);
+                } else {
+                    // Si no se encuentra un carrito activo, crear uno nuevo
+                    log.info("No active cart found for user {}. Creating a new one.", emailUsuarioLogueado);
+                    Carrito nuevoCarrito = new Carrito();
+                    nuevoCarrito.setUsuario(usuarioRepository.findByEmail(emailUsuarioLogueado)
+                        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"))); // Asegurarse de que el usuario existe
+
+                    DTCarrito carritoCreado = carritoService.createCarrito(nuevoCarrito);
+
+                    log.info("New cart created for user {}: {}", emailUsuarioLogueado, carritoCreado.getId());
+                    return new ResponseEntity<>(carritoCreado, HttpStatus.CREATED); // Devolver el carrito recién creado con 201
                 }
-                log.warn("Carrito no encontrado para el usuario: {}", emailUsuarioLogueado);
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             } catch (Exception e) {
-                log.error("Error al obtener carrito para el usuario {}: {}", emailUsuarioLogueado, e.getMessage(), e);
+                log.error("Error al obtener o crear carrito para el usuario {}: {}", emailUsuarioLogueado, e.getMessage(), e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
