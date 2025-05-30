@@ -214,27 +214,47 @@ public class CarritoController {
     }
 
     @PutMapping("/{id}/cerrar")
-    public ResponseEntity<DTCarrito> cerrarCarrito(@PathVariable Long id) {
+    public ResponseEntity<?> cerrarCarrito(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
-             String emailUsuarioLogueado = auth.getName();
+            String emailUsuarioLogueado = auth.getName();
             DTCarrito carrito = carritoService.getCarritoById(id);
+            
             if (carrito == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Carrito no encontrado");
             }
-            if (!carrito.getUsuario().equals(emailUsuarioLogueado) && !auth.getAuthorities().stream().anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-                 log.warn("Intento de cerrar carrito no autorizado con ID {} por usuario {}", id, emailUsuarioLogueado);
-                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            
+            if (!carrito.getUsuario().equals(emailUsuarioLogueado) && 
+                !auth.getAuthorities().stream().anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                log.warn("Intento de cerrar carrito no autorizado con ID {} por usuario {}", 
+                    id, emailUsuarioLogueado);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("No tienes permiso para cerrar este carrito");
             }
 
-            DTCarrito carritoCerrado = carritoService.desactivarCarrito(id);
-            if (carritoCerrado != null) {
-                return new ResponseEntity<>(carritoCerrado, HttpStatus.OK);
+            try {
+                DTCarrito carritoCerrado = carritoService.desactivarCarrito(id);
+                if (carritoCerrado != null) {
+                    log.info("Carrito {} cerrado exitosamente para usuario {}", 
+                        id, emailUsuarioLogueado);
+                    return ResponseEntity.ok(carritoCerrado);
+                }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No se pudo cerrar el carrito");
+            } catch (IllegalStateException e) {
+                log.warn("Error al cerrar carrito {}: {}", id, e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+            } catch (Exception e) {
+                log.error("Error inesperado al cerrar carrito {}: {}", id, e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al procesar la solicitud");
             }
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body("No tienes permiso para realizar esta acción");
     }
 
     @GetMapping("/me")

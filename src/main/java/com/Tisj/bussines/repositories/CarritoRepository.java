@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CarritoRepository extends JpaRepository<Carrito, Long> {
 
-    Optional<Carrito> findByUsuarioEmail(@Param("email") String email);
+    Optional<Carrito> findByUsuarioEmailAndActivoTrue(@Param("email") String email);
 }

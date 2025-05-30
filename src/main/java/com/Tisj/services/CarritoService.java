@@ -23,6 +23,9 @@ public class CarritoService {
     @Autowired
     private ArticuloService articuloService;
 
+    @Autowired
+    private ArticuloClienteService articuloClienteService;
+
     private DTCarrito convertirADTO(Carrito carrito) {
         if (carrito == null) return null;
         return new DTCarrito(
@@ -107,9 +110,7 @@ public class CarritoService {
             if (email == null || email.trim().isEmpty()) {
                 throw new IllegalArgumentException("El email del usuario no puede ser nulo o vacío");
             }
-            Carrito carrito = carritoRepository.findByUsuarioEmail(email)
-                    .filter(Carrito::isActivo)
-                    .orElse(null);
+            Carrito carrito = carritoRepository.findByUsuarioEmailAndActivoTrue(email).orElse(null);
             if (carrito != null) {
                 carrito.getItems().size();
             }
@@ -178,12 +179,47 @@ public class CarritoService {
 
     @Transactional
     public DTCarrito desactivarCarrito(Long carritoId) {
-        Carrito carrito = carritoRepository.findById(carritoId).orElse(null);
-        if (carrito != null) {
+        try {
+            Carrito carrito = carritoRepository.findById(carritoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado"));
+            
+            if (carrito.getPago() == null) {
+                throw new IllegalStateException("No se puede cerrar un carrito sin pago asociado");
+            }
+
+            // Procesar la compra antes de desactivar el carrito
+            procesarCompraCarrito(carrito);
+            
             carrito.desactivar();
             return convertirADTO(carritoRepository.save(carrito));
+        } catch (Exception e) {
+            log.error("Error al desactivar carrito {}: {}", carritoId, e.getMessage());
+            throw e;
         }
-        return null;
+    }
+
+    @Transactional
+    private void procesarCompraCarrito(Carrito carrito) {
+        if (carrito == null || carrito.getItems() == null || carrito.getItems().isEmpty()) {
+            throw new IllegalArgumentException("El carrito está vacío o es inválido");
+        }
+
+        String emailUsuario = carrito.getUsuarioId();
+        if (emailUsuario == null) {
+            throw new IllegalStateException("El carrito no tiene un usuario asociado");
+        }
+
+        // Por cada artículo en el carrito, crear un ArticuloCliente
+        for (Articulo articulo : carrito.getItems()) {
+            try {
+                articuloClienteService.comprarArticulo(emailUsuario, articulo.getId());
+                log.info("Artículo {} agregado al usuario {}", articulo.getId(), emailUsuario);
+            } catch (Exception e) {
+                log.error("Error al procesar artículo {} para usuario {}: {}", 
+                    articulo.getId(), emailUsuario, e.getMessage());
+                throw new RuntimeException("Error al procesar la compra: " + e.getMessage());
+            }
+        }
     }
 
     @Transactional
