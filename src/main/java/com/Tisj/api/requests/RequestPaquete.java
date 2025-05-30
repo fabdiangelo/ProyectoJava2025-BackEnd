@@ -13,4 +13,5 @@ public class RequestPaquete {
     private Float precio;
     private String videoPresentacion;
     private List<String> cursos;
+    private Boolean activo;
 }

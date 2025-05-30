@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,10 +44,13 @@ public class PaqueteService {
     }
 
     public Paquete reqToPaquete(RequestPaquete reqPaquete) {
-        List<Curso> cursos = reqPaquete.getCursos()
-                .stream()
-                .map(nombre -> cursoService.getCursoByNombre(nombre))
-                .toList();
+        List<Curso> cursos = new ArrayList<>(
+                reqPaquete.getCursos()
+                        .stream()
+                        .map(nombre -> cursoService.getCursoByNombre(nombre))
+                        .toList()
+        );
+
 
         if(cursos.stream().anyMatch(Objects::isNull)){
             return null;
@@ -59,7 +63,12 @@ public class PaqueteService {
                 reqPaquete.getVideoPresentacion(),
                 cursos
         );
-        paquete.setActivo(true);
+
+        if(reqPaquete.getActivo() != null) {
+            paquete.setActivo(reqPaquete.getActivo());
+        }else{
+            paquete.setActivo(true);
+        }
         return paquete;
     }
 
@@ -70,11 +79,20 @@ public class PaqueteService {
 
     public Paquete updatePaquete(Long id, Paquete paquete) {
         Paquete modificable = getPaqueteById(id);
-        if (modificable != null && paquete != null) {
-            paquete.setId(id);
-            paquete.setCursos(modificable.getCursos());
-            paquete.setActivo(true);
-            return paqueteRepository.save(paquete);
+        if (modificable != null) {
+            if(paquete.getNombre() != null)
+                modificable.setNombre(paquete.getNombre());
+            if(paquete.getDescripcion() != null)
+                modificable.setDescripcion(paquete.getDescripcion());
+            if(paquete.getPrecio() != null)
+                modificable.setPrecio(paquete.getPrecio());
+            if(paquete.getVideoPresentacion() != null)
+                modificable.setVideoPresentacion(paquete.getVideoPresentacion());
+            if(paquete.getCursos() != null)
+                modificable.setCursos(paquete.getCursos());
+            if(paquete.getActivo() != null)
+                modificable.setActivo(paquete.getActivo());
+            return paqueteRepository.save(modificable);
         }
         return null;
     }

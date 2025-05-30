@@ -34,6 +34,11 @@ public class Paquete extends Articulo{
         this.cursos = cursos;
     }
 
+    public Paquete (String nombre, String descripcion, Float precio, String videoPresentacion, List<Curso> cursos, Boolean activo){
+        super(nombre, descripcion, precio, videoPresentacion, activo);
+        this.cursos = cursos;
+    }
+
 
     public Paquete orElseThrow(Object object) {
         // TODO Auto-generated method stub

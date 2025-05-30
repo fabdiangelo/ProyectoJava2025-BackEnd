@@ -55,7 +55,7 @@ public class Carrito {
 
     public Articulo agregarAlCarrito(Articulo articulo) {
         if (!this.activo) return null;
-        if (articulo == null || !articulo.isActivo()) return null;
+        if (articulo == null || !articulo.getActivo()) return null;
         if (items.add(articulo)) {
             return articulo;
         }

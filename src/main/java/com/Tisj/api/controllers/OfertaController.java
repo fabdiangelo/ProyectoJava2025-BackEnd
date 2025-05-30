@@ -55,7 +55,7 @@ public class OfertaController {
             articulo.getDescripcion(),
             articulo.getPrecio(),
             articulo.getVideoPresentacion(),
-            articulo.isActivo()
+            articulo.getActivo()
         );
     }
 

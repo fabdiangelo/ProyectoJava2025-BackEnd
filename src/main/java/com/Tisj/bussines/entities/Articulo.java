@@ -26,12 +26,11 @@ public class Articulo {
     @Column(nullable = false)
     private Float precio;
     private String videoPresentacion;
+    private Boolean activo;
 
     @ManyToOne
     @JoinColumn(name = "oferta_id")
     private Oferta oferta;
-
-    private boolean activo;
 
     @OneToMany(mappedBy = "articulo")
     @JsonBackReference
@@ -44,5 +43,14 @@ public class Articulo {
         this.videoPresentacion = videoPresentacion;
         this.oferta = null;
         this.activo = true;
+    }
+
+    public Articulo (String nombre, String descripcion, Float precio, String videoPresentacion, Boolean activo){
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.videoPresentacion = videoPresentacion;
+        this.oferta = null;
+        this.activo = activo;
     }
 }
