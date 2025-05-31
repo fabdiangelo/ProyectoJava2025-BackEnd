@@ -67,7 +67,7 @@ public class Carrito {
         if (articulo == null) {
             throw new IllegalArgumentException("El artículo no puede ser nulo");
         }
-        if (!articulo.isActivo()) {
+        if (!articulo.getActivo()) {
             throw new IllegalStateException("El artículo no está disponible");
         }
         if (items.contains(articulo)) {
