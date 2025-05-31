@@ -14,6 +14,8 @@ import java.util.List;
 @Getter
 @Setter
 public class Carrito {
+    private static final int MAX_ITEMS_PER_CART = 50; // Límite máximo de items por carrito
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -44,24 +46,45 @@ public class Carrito {
         this.activo = true;
     }
 
-    public Boolean quitarItem(int id){
-        if (!this.activo) return false;
+    public Boolean quitarItem(Long id) {
+        if (!this.activo) {
+            throw new IllegalStateException("El carrito no está activo");
+        }
         return items.removeIf(item -> item.getId().equals(id));
     }
 
     public Boolean quitarElementoDelCarrito(Long articuloId) {
-        return quitarItem(articuloId.intValue());
+        if (articuloId == null) {
+            throw new IllegalArgumentException("El ID del artículo no puede ser nulo");
+        }
+        return quitarItem(articuloId);
     }
 
     public Articulo agregarAlCarrito(Articulo articulo) {
-        if (!this.activo) return null;
-        if (articulo == null || !articulo.getActivo()) return null;
+        if (!this.activo) {
+            throw new IllegalStateException("El carrito no está activo");
+        }
+        if (articulo == null) {
+            throw new IllegalArgumentException("El artículo no puede ser nulo");
+        }
+        if (!articulo.isActivo()) {
+            throw new IllegalStateException("El artículo no está disponible");
+        }
+        if (items.contains(articulo)) {
+            throw new IllegalStateException("El artículo ya está en el carrito");
+        }
+        if (items.size() >= MAX_ITEMS_PER_CART) {
+            throw new IllegalStateException("El carrito ha alcanzado el límite de items");
+        }
+        
         if (items.add(articulo)) {
             return articulo;
         }
         return null;
     }
-    
+    public String getUsuarioId(){
+        return this.usuario != null ? this.usuario.getEmail() : null;
+    }
 
     public Float getMontoTotal(){
         if (!this.activo) return 0f;
@@ -72,6 +95,14 @@ public class Carrito {
 
     public Float pedirMonto() {
         return getMontoTotal();
+    }
+
+    public boolean isVencido() {
+        return LocalDate.now().isAfter(this.vencimiento);
+    }
+
+    public void renovarVencimiento() {
+        this.vencimiento = LocalDate.now().plusWeeks(1);
     }
 
     public void desactivar() {
