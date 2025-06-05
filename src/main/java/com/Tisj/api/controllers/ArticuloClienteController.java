@@ -93,8 +93,6 @@ public class ArticuloClienteController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            // Ensure ID is null to force auto-generation
-            articuloCliente.setId(null);
             ArticuloCliente nuevoArticuloCliente = articuloClienteService.createArticuloCliente(articuloCliente);
             return new ResponseEntity<>(nuevoArticuloCliente, HttpStatus.CREATED);
         }
@@ -166,9 +164,6 @@ public class ArticuloClienteController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             try {
-                // Ignorar cualquier ID que pueda venir en el DTO, será autogenerado
-                dto.id = null;
-                
                 // Llamar al método del servicio con el email del usuario y el ID del artículo
                 DTArticuloCliente guardado = articuloClienteService.createArticuloClienteForUser(userEmail, dto.articulo);
                 if (guardado == null) {

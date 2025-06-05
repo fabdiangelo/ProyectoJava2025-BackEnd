@@ -2,7 +2,6 @@ package com.Tisj.services;
 
 import com.Tisj.bussines.entities.Carrito;
 import com.Tisj.bussines.entities.Articulo;
-import com.Tisj.bussines.entities.ArticuloCliente;
 import com.Tisj.bussines.entities.DT.DTCarrito;
 import com.Tisj.bussines.repositories.CarritoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,21 +213,8 @@ public class CarritoService {
         // Por cada artículo en el carrito, crear un ArticuloCliente
         for (Articulo articulo : carrito.getItems()) {
             try {
-                // Intentar comprar el artículo
-                ArticuloCliente resultado = articuloClienteService.comprarArticulo(emailUsuario, articulo.getId());
-                
-                if (resultado != null) {
-                    log.info("Artículo {} agregado al usuario {}", articulo.getId(), emailUsuario);
-                } else {
-                    // Si el artículo ya existe para el usuario, verificamos si está activo
-                    // y si no lo está, lo reactivamos
-                    log.info("El artículo {} ya existe para el usuario {}. Verificando estado...", 
-                        articulo.getId(), emailUsuario);
-                    
-                    // Usar createArticuloClienteForUser que maneja mejor este caso
-                    articuloClienteService.createArticuloClienteForUser(emailUsuario, articulo.getId());
-                    log.info("Artículo {} procesado para el usuario {}", articulo.getId(), emailUsuario);
-                }
+                articuloClienteService.comprarArticulo(emailUsuario, articulo.getId());
+                log.info("Artículo {} agregado al usuario {}", articulo.getId(), emailUsuario);
             } catch (Exception e) {
                 log.error("Error al procesar artículo {} para usuario {}: {}", 
                     articulo.getId(), emailUsuario, e.getMessage());

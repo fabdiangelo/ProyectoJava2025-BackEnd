@@ -65,29 +65,12 @@ public class CursoController {
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> (p.getAuthority().equals("ADMIN")
                         || p.getAuthority().equals("USER")))) {
-            try {
-                log.info("Solicitando curso con ID: {}", id);
-                Curso curso = cursoService.getCursoById(id);
-                if (curso == null) {
-                    log.warn("Curso con ID: {} no encontrado o inactivo", id);
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
-                log.info("Curso con ID: {} encontrado y devuelto correctamente", id);
-                return new ResponseEntity<>(curso, HttpStatus.OK);
-            } catch (Exception e) {
-                log.error("Error al obtener curso con ID {}: {}", id, e.getMessage(), e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            Curso curso = cursoService.getCursoById(id);
+            if (curso == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+            return new ResponseEntity<>(curso, HttpStatus.OK);
         } else {
-            log.warn("Acceso denegado al intentar obtener curso con ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-            } catch (Exception e) {
-                log.error("Error al obtener curso con ID {}: {}", id, e.getMessage(), e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else {
-            log.warn("Acceso denegado al intentar obtener curso con ID: {}", id);
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
