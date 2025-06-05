@@ -12,7 +12,11 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class CursoService {
 
@@ -26,11 +30,37 @@ public class CursoService {
     private OfertaService ofertaService;
 
     public List<Curso> getAllCursos() {
+        log.info("Obteniendo todos los cursos activos");
         return cursoRepository.findByActivoTrue();
     }
 
     public Curso getCursoById(Long id) {
-        return cursoRepository.findByIdAndActivoTrue(id);
+        log.info("Buscando curso con ID: {}", id);
+        
+        // Primero verificamos si el curso existe, independientemente de su estado activo
+        Optional<Curso> cursoOptional = cursoRepository.findById(id);
+        
+        if (!cursoOptional.isPresent()) {
+            log.warn("No se encontró ningún curso con ID: {}", id);
+            return null;
+        }
+        
+        // Verificamos si el curso existe pero está inactivo
+        Optional<Curso> inactiveCursoOptional = cursoRepository.findInactiveCursoById(id);
+        if (inactiveCursoOptional.isPresent()) {
+            log.warn("El curso con ID: {} existe pero está inactivo", id);
+            return null;
+        }
+        
+        // Si llegamos aquí, el curso existe y está activo
+        Curso curso = cursoRepository.findByIdAndActivoTrue(id);
+        if (curso != null) {
+            log.info("Curso con ID: {} encontrado correctamente", id);
+        } else {
+            log.error("Inconsistencia en la base de datos: El curso con ID: {} debería estar activo pero no se encontró", id);
+        }
+        
+        return curso;
     }
 
     public Curso createCurso(Curso curso) {

@@ -63,6 +63,8 @@ public class ArticuloClienteService {
     }
 
     public ArticuloCliente createArticuloCliente(ArticuloCliente articuloCliente) {
+        // Ensure ID is null to force auto-generation
+        articuloCliente.setId(null);
         articuloCliente.setEstado(ArticuloCliente.Estado.ACTIVO);
         articuloCliente.setCaducidad(java.time.LocalDate.now().plusMonths(3));
         return articuloClienteRepository.save(articuloCliente);
@@ -99,18 +101,42 @@ public class ArticuloClienteService {
         Articulo articulo = articuloRepository.findById(articuloId).orElse(null);
 
         if (usuario == null || articulo == null) {
+            log.warn("Usuario o artículo no encontrado: email={}, articuloId={}", email, articuloId);
             return null;
         }
 
         // Verificar si ya tiene el artículo
         if (articuloClienteRepository.existsByUsuarioAndArticulo(usuario, articulo)) {
-            return null;
+            log.info("El usuario {} ya tiene el artículo {}. Buscando para actualizar...", email, articuloId);
+            
+            // Buscar todos los ArticuloCliente del usuario
+            List<ArticuloCliente> articulosCliente = articuloClienteRepository.findByUsuarioEmail(email);
+            
+            // Encontrar el ArticuloCliente específico para este artículo
+            ArticuloCliente articuloClienteExistente = articulosCliente.stream()
+                .filter(ac -> ac.getArticulo().getId().equals(articuloId))
+                .findFirst()
+                .orElse(null);
+            
+            if (articuloClienteExistente != null) {
+                // Actualizar el ArticuloCliente existente
+                articuloClienteExistente.setActivo(true);
+                articuloClienteExistente.setEstado(ArticuloCliente.Estado.ACTIVO);
+                articuloClienteExistente.setCaducidad(java.time.LocalDate.now().plusMonths(3));
+                
+                ArticuloCliente actualizado = articuloClienteRepository.save(articuloClienteExistente);
+                log.info("ArticuloCliente actualizado para usuario {} y artículo {}", email, articuloId);
+                return actualizado;
+            }
         }
 
+        // Si no existe o no se pudo encontrar, crear uno nuevo
         ArticuloCliente articuloCliente = new ArticuloCliente(articulo, usuario);
         articuloCliente.setEstado(ArticuloCliente.Estado.ACTIVO);
         articuloCliente.setCaducidad(java.time.LocalDate.now().plusMonths(3));
-        return articuloClienteRepository.save(articuloCliente);
+        ArticuloCliente guardado = articuloClienteRepository.save(articuloCliente);
+        log.info("Nuevo ArticuloCliente creado para usuario {} y artículo {}", email, articuloId);
+        return guardado;
     }
 
     @Transactional(readOnly = true)
@@ -180,19 +206,43 @@ public class ArticuloClienteService {
 
         // Verificar si ya tiene el artículo
         if (articuloClienteRepository.existsByUsuarioAndArticulo(usuario, articulo)) {
-            log.warn("El usuario {} ya tiene el artículo {}", userEmail, articuloId);
-            // Retornar null para indicar que el artículo ya existe para este usuario
-            return null;
+            log.info("El usuario {} ya tiene el artículo {}. Buscando para actualizar...", userEmail, articuloId);
+            
+            // Buscar todos los ArticuloCliente del usuario
+            List<ArticuloCliente> articulosCliente = articuloClienteRepository.findByUsuarioEmail(userEmail);
+            
+            // Encontrar el ArticuloCliente específico para este artículo
+            ArticuloCliente articuloClienteExistente = articulosCliente.stream()
+                .filter(ac -> ac.getArticulo().getId().equals(articuloId))
+                .findFirst()
+                .orElse(null);
+            
+            if (articuloClienteExistente != null) {
+                // Actualizar el ArticuloCliente existente
+                articuloClienteExistente.setActivo(true);
+                articuloClienteExistente.setEstado(ArticuloCliente.Estado.ACTIVO);
+                articuloClienteExistente.setCaducidad(java.time.LocalDate.now().plusMonths(3));
+                
+                ArticuloCliente actualizado = articuloClienteRepository.save(articuloClienteExistente);
+                log.info("ArticuloCliente actualizado para usuario {} y artículo {}", userEmail, articuloId);
+                return toDTO(actualizado);
+            } else {
+                log.warn("No se encontró el ArticuloCliente a pesar de que existsByUsuarioAndArticulo devolvió true");
+            }
         }
 
+        // Si no existe o no se pudo encontrar, crear uno nuevo
         ArticuloCliente ac = new ArticuloCliente();
+        // Ensure ID is null to force auto-generation
+        ac.setId(null);
         ac.setArticulo(articulo);
         ac.setUsuario(usuario);
         ac.setActivo(true); // Set activo to true by default
         ac.setCaducidad(java.time.LocalDate.now().plusMonths(3)); // Set caducidad to 3 months from now
-        ac.setEstado(ArticuloCliente.Estado.ACTIVO); // Set estado to INCOMPLETO
+        ac.setEstado(ArticuloCliente.Estado.ACTIVO); // Set estado to ACTIVO
 
         ArticuloCliente guardado = articuloClienteRepository.save(ac);
+        log.info("Nuevo ArticuloCliente creado para usuario {} y artículo {}", userEmail, articuloId);
         return toDTO(guardado);
     }
 
