@@ -166,36 +166,32 @@ public class ArticuloClienteService {
         return ac != null ? toDTO(ac) : null;
     }
 
-    public DTArticuloCliente createArticuloClienteFromDTO(DTArticuloCliente dto) {
-        if (dto.articulo == null) {
-            log.warn("ID de artículo no proporcionado");
-            throw new IllegalArgumentException("ID de artículo no proporcionado");
-        }
-        if (dto.usuario == null || dto.usuario.isBlank()) {
-            log.warn("Email de usuario no proporcionado");
-            throw new IllegalArgumentException("Email de usuario no proporcionado");
-        }
-        Articulo articulo = articuloRepository.findById(dto.articulo).orElse(null);
-        if (articulo == null) {
-            log.warn("Artículo no encontrado con id: {}", dto.articulo);
-            throw new IllegalArgumentException("Artículo no encontrado con id: " + dto.articulo);
-        }
-        Usuario usuario = usuarioRepository.findByEmail(dto.usuario).orElse(null);
+    public DTArticuloCliente createArticuloClienteForUser(String userEmail, Long articuloId) {
+        Usuario usuario = usuarioRepository.findByEmail(userEmail).orElse(null);
         if (usuario == null) {
-            log.warn("Usuario no encontrado con email: {}", dto.usuario);
-            throw new IllegalArgumentException("Usuario no encontrado con email: " + dto.usuario);
+            log.warn("Usuario no encontrado con email: {}", userEmail);
+            throw new IllegalArgumentException("Usuario no encontrado con email: " + userEmail);
         }
+        Articulo articulo = articuloRepository.findById(articuloId).orElse(null);
+        if (articulo == null) {
+            log.warn("Artículo no encontrado con id: {}", articuloId);
+            throw new IllegalArgumentException("Artículo no encontrado con id: " + articuloId);
+        }
+
+        // Verificar si ya tiene el artículo
+        if (articuloClienteRepository.existsByUsuarioAndArticulo(usuario, articulo)) {
+            log.warn("El usuario {} ya tiene el artículo {}", userEmail, articuloId);
+            // Retornar null para indicar que el artículo ya existe para este usuario
+            return null;
+        }
+
         ArticuloCliente ac = new ArticuloCliente();
         ac.setArticulo(articulo);
         ac.setUsuario(usuario);
-        ac.setCaducidad(dto.caducidad);
-        try {
-            ac.setEstado(ArticuloCliente.Estado.valueOf(dto.estado));
-        } catch (Exception e) {
-            log.warn("Estado inválido: {}", dto.estado);
-            throw new IllegalArgumentException("Estado inválido: " + dto.estado + ". Debe ser ACTIVO, COMPLETO o CADUCADO.");
-        }
-        ac.setActivo(dto.activo != null ? dto.activo : true);
+        ac.setActivo(true); // Set activo to true by default
+        ac.setCaducidad(java.time.LocalDate.now().plusMonths(3)); // Set caducidad to 3 months from now
+        ac.setEstado(ArticuloCliente.Estado.ACTIVO); // Set estado to INCOMPLETO
+
         ArticuloCliente guardado = articuloClienteRepository.save(ac);
         return toDTO(guardado);
     }

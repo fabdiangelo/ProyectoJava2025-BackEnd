@@ -152,18 +152,35 @@ public class ArticuloClienteController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    // Endpoint POST para crear ArticuloCliente usando el DTO esencial
+    // Endpoint POST para crear ArticuloCliente usando el DTO esencial para el usuario logueado
     @PostMapping("/usuario")
     public ResponseEntity<DTArticuloCliente> crearArticuloClienteDesdeDTO(@RequestBody DTArticuloCliente dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
-            DTArticuloCliente guardado = articuloClienteService.createArticuloClienteFromDTO(dto);
-            if (guardado == null) {
+            String userEmail = auth.getName(); // Obtener el email del usuario logueado
+            if (dto.articulo == null) { // Accediendo directamente al campo público 'articulo'
+                log.warn("ID de artículo no proporcionado en el DTO");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(guardado, HttpStatus.CREATED);
+            try {
+                // Llamar al método del servicio con el email del usuario y el ID del artículo
+                DTArticuloCliente guardado = articuloClienteService.createArticuloClienteForUser(userEmail, dto.articulo);
+                if (guardado == null) {
+                    // El servicio retornó null, probablemente porque el usuario ya tiene el artículo
+                    log.warn("El usuario {} ya tiene el artículo {}", userEmail, dto.articulo);
+                    return new ResponseEntity<>(HttpStatus.CONFLICT); // Usar CONFLICT para recurso existente
+                }
+                return new ResponseEntity<>(guardado, HttpStatus.CREATED);
+            } catch (IllegalArgumentException e) {
+                log.error("Error al crear ArticuloCliente: {}", e.getMessage());
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Manejar casos donde el usuario/artículo no se encuentra
+            } catch (Exception e) {
+                log.error("Error inesperado al crear ArticuloCliente para usuario {}: {}", userEmail, e.getMessage(), e);
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
+        log.warn("Intento de crear ArticuloCliente sin autorización");
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 }
