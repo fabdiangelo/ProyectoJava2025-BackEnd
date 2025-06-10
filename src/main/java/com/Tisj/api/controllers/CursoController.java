@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Slf4j
 @RestController
@@ -120,6 +122,32 @@ public class CursoController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping("/{id}/carrito")
+    public ResponseEntity<Map<String, Object>> getCursoParaCarrito(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
+                        || p.getAuthority().equals("USER")))) {
+            Curso curso = cursoService.getCursoById(id);
+            if (curso == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            
+            // Crear un mapa con solo la información necesaria para el carrito
+            Map<String, Object> cursoInfo = new HashMap<>();
+            cursoInfo.put("id", curso.getId());
+            cursoInfo.put("nombre", curso.getNombre());
+            cursoInfo.put("descripcion", curso.getDescripcion());
+            cursoInfo.put("precio", curso.getPrecio());
+            cursoInfo.put("videoPresentacion", curso.getVideoPresentacion());
+            cursoInfo.put("duracionTotal", curso.getDuracionTotal());
+            
+            return new ResponseEntity<>(cursoInfo, HttpStatus.OK);
+        } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }

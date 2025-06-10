@@ -103,11 +103,11 @@ public class CarritoController {
                 // Actualizar items si se proporcionan
                 if (request.getItemIds() != null) {
                     // Primero limpiar el carrito actual
-                    carrito.getItems().forEach(itemId -> {
+                    carrito.getItems().forEach(articulo -> {
                         try {
-                            carritoService.quitarItemDelCarrito(id, itemId);
+                            carritoService.quitarItemDelCarrito(id, articulo.getId());
                         } catch (Exception e) {
-                            log.error("Error al quitar item {} del carrito: {}", itemId, e.getMessage());
+                            log.error("Error al quitar item {} del carrito: {}", articulo.getId(), e.getMessage());
                         }
                     });
                     // Luego agregar los nuevos items

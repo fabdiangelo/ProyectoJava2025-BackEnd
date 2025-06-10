@@ -2,19 +2,20 @@ package com.Tisj.bussines.entities.DT;
 
 import java.time.LocalDate;
 import java.util.List;
+import com.Tisj.bussines.entities.DT.DTArticulo;
 
 public class DTCarrito {
     private Long id;
     private LocalDate vencimiento;
     private boolean activo;
-    private List<Long> items; // IDs de los artículos
+    private List<DTArticulo> items; // Artículos completos
     private Long pago; // ID del pago
     private String usuario; // Email del usuario
     private Float montoTotal;
 
     public DTCarrito() {}
 
-    public DTCarrito(Long id, LocalDate vencimiento, boolean activo, List<Long> items, Long pago, String usuario, Float montoTotal) {
+    public DTCarrito(Long id, LocalDate vencimiento, boolean activo, List<DTArticulo> items, Long pago, String usuario, Float montoTotal) {
         this.id = id;
         this.vencimiento = vencimiento;
         this.activo = activo;
@@ -34,8 +35,8 @@ public class DTCarrito {
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
 
-    public List<Long> getItems() { return items; }
-    public void setItems(List<Long> items) { this.items = items; }
+    public List<DTArticulo> getItems() { return items; }
+    public void setItems(List<DTArticulo> items) { this.items = items; }
 
     public Long getPago() { return pago; }
     public void setPago(Long pago) { this.pago = pago; }
