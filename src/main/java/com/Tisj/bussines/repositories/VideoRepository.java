@@ -11,4 +11,7 @@ import java.util.List;
 public interface VideoRepository extends JpaRepository<Video, Long> {
     List<Video> findByActivoTrue();
     Video findByIdAndActivoTrue(Long id);
+
+    @Override
+    void deleteById(Long aLong);
 }

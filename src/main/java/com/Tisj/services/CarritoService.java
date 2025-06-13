@@ -200,7 +200,7 @@ public class CarritoService {
             // }
 
             // Procesar la compra antes de desactivar el carrito
-            procesarCompraCarrito(carrito);
+            procesarCompraCarrito(carritoId);
             
             carrito.desactivar();
             return convertirADTO(carritoRepository.save(carrito));
@@ -211,7 +211,8 @@ public class CarritoService {
     }
 
     @Transactional
-    private void procesarCompraCarrito(Carrito carrito) {
+    public void procesarCompraCarrito(Long carritoId) {
+        Carrito carrito = carritoRepository.findById(carritoId).orElse(null);
         if (carrito == null || carrito.getItems() == null || carrito.getItems().isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío o es inválido");
         }

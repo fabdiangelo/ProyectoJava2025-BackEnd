@@ -2,14 +2,20 @@ package com.Tisj.api.controllers;
 import com.Tisj.api.requests.RequestPago;
 import com.Tisj.api.pojo.PayPal.Root;
 import com.Tisj.services.PayPalService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.Value;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @RestController
@@ -101,6 +107,13 @@ public class PayPalController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tiene permisos para realizar esta operación");
         }
+    }
+
+
+    @PostMapping("/paypal/webhook")
+    public ResponseEntity<String> handleWebhook(HttpServletRequest request,
+                                                @RequestBody String body) {
+        return null;
     }
 }
 

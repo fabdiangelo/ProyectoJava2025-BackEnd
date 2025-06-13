@@ -16,11 +16,27 @@ import java.util.stream.Collectors;
 
 public class FiltroJWTAutorizacion extends OncePerRequestFilter {
 
+    private static final List<String> rutasPublicas = List.of(
+            "/api/usuarios",
+            "/api/login",
+            "/api/curso",
+            "/api/mercado-pago/webhook",
+            "/api/paquete/**"
+    );
+
+    private boolean esRutaPublica(HttpServletRequest request) {
+        return rutasPublicas.contains(request.getRequestURI()) && request.getMethod().equals("POST");
+    }
+
     private final String CLAVE =  System.getenv("SECRET_KEY");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
+            if (esRutaPublica(request)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             if(varlidarUsoDeToken(request, response)){
                 Claims claims = validarToken(request);
                 if(claims.get("authorities") != null){
