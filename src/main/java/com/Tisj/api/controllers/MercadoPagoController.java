@@ -68,7 +68,7 @@ public class MercadoPagoController {
                     Long usuarioId = Long.valueOf(partes[0]);
                     Long carritoId = Long.valueOf(partes[1]);
 
-                    // 🧠 Lógica: asignar los artículos de ese carrito al usuario
+                    // asignar los artículos de ese carrito al usuario
                     carritoService.desactivarCarrito(carritoId);
 
                     System.out.println("Pago aprobado y artículos asignados a usuario " + usuarioId);

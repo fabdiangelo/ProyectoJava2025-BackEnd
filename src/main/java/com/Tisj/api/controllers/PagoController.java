@@ -105,17 +105,17 @@ public class PagoController {
         }
     }
 
-    @PostMapping("/paypal/{orderId}/capture")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> capturarEstadoPagoPayPal(@PathVariable String orderId) {
-        try {
-            String estado = pagoService.capturarEstadoOrdenPayPal(orderId);
-            return ResponseEntity.ok(estado);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al capturar el estado del pago: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/paypal/{orderId}/capture")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<String> capturarEstadoPagoPayPal(@PathVariable String orderId) {
+//        try {
+//            String estado = pagoService.capturarEstadoOrdenPayPal(orderId);
+//            return ResponseEntity.ok(estado);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error al capturar el estado del pago: " + e.getMessage());
+//        }
+//    }
 
     @PostMapping("/captura")
     @PreAuthorize("isAuthenticated()")

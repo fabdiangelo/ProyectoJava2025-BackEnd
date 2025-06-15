@@ -1,6 +1,5 @@
 package com.Tisj.services;
 import com.Tisj.api.requests.RequestMP;
-import com.Tisj.bussines.entities.DT.DTArtCarrito;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.preference.*;
 import com.mercadopago.resources.preference.Preference;
