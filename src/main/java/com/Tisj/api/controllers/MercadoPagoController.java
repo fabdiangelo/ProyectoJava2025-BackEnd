@@ -69,11 +69,11 @@ public class MercadoPagoController {
                     Long carritoId = Long.valueOf(partes[1]);
 
                     // asignar los artículos de ese carrito al usuario
-                    carritoService.desactivarCarrito(carritoId);
-
+                    DTCarrito dt = carritoService.desactivarCarrito(carritoId);
+                    System.out.println(dt);
                     System.out.println("Pago aprobado y artículos asignados a usuario " + usuarioId);
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("No se pudo cerrar el carrito");
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body("Compra realizada");
                 } else {
                     System.out.println("Pago NO aprobado: " + pago.getStatus());
                 }

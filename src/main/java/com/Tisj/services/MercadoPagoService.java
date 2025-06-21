@@ -27,8 +27,8 @@ public class MercadoPagoService {
         ).toList();
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success("https://solfuentes-prueba.netlify.app/Pago")
-                .failure("https://solfuentes-prueba.netlify.app/")
+                .success("https://solfuentes-prueba.netlify.app/pago-mercado-pago")
+                .failure("https://solfuentes-prueba.netlify.app/pago-mercado-pago")
                 .pending("https://solfuentes-prueba.netlify.app/Carrito")
                 .build();
 

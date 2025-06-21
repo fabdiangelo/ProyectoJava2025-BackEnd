@@ -53,7 +53,8 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/webhook")).permitAll() // Webhook de Mercado Pago (público)
                         .requestMatchers(antMatcher("/api/paypal/**")).permitAll() // Endpoints de PayPal
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/usuarios")).permitAll() // Webhook de Mercado Pago (público)
-                        .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquete/**")).permitAll() // Endpoints de paquete
+                        .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes/**")).permitAll() // Endpoints de paquete
+                        .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes")).permitAll() // Endpoints de paquete
 
                         // Rutas protegidas que requieren USER o ADMIN
                         // Artículos Cliente (ejemplos, ajustar según lógica de negocio)

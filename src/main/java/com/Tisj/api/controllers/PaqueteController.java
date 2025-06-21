@@ -19,7 +19,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/paquetes")
-@PreAuthorize("hasAuthority('ADMIN')")
 public class PaqueteController {
 
     @Autowired
@@ -43,18 +42,18 @@ public class PaqueteController {
 
     @GetMapping
     public ResponseEntity<List<Paquete>> getPaquetes() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
-                        || p.getAuthority().equals("USER")))) {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        if (auth.getAuthorities().stream()
+//                .anyMatch(p -> (p.getAuthority().equals("ADMIN")
+//                        || p.getAuthority().equals("USER")))) {
             List<Paquete> paquetes = paqueteService.getAllPaquetes();
             if(paquetes.isEmpty()){
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(paquetes, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//        }
     }
 
     @GetMapping("/{id}")
