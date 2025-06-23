@@ -1,5 +1,6 @@
 package com.Tisj.api.controllers;
 import com.Tisj.api.requests.RequestMP;
+import com.Tisj.bussines.entities.DT.DTCarrito;
 import com.Tisj.services.CarritoService;
 import com.Tisj.services.PayPalService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class PayPalController {
     }
 
     @PostMapping("/capturar")
-    public ResponseEntity<String> capturarOrden(@RequestParam String orderId) {
+    public ResponseEntity<DTCarrito> capturarOrden(@RequestParam String orderId) {
         try {
             // 1. Obtener token de acceso
             String accessToken = payPalService.obtenerAccessToken();
@@ -49,7 +50,7 @@ public class PayPalController {
             String status = json.get("status").asText();
             if (!"COMPLETED".equals(status)) {
                 System.out.println("La orden no fue completada: " + status);
-                return ResponseEntity.badRequest().body("La orden no fue completada");
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
             // 4. Obtener reference_id: "usuarioId|carritoId"
@@ -58,19 +59,19 @@ public class PayPalController {
 
             String[] partes = referenceId.split("\\|");
             if (partes.length != 2) {
-                return ResponseEntity.badRequest().body("Referencia inválida");
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             System.out.println("Valor para carritoId: '" + partes[1] + "'");
             Long carritoId = Long.valueOf(partes[1]);
 
             // 5. Desactivar carrito
-            carritoService.desactivarCarrito(carritoId);
+            DTCarrito res = carritoService.desactivarCarrito(carritoId);
 
             System.out.println("Orden capturada con éxito. Artículos asignados al usuario ");
-            return ResponseEntity.ok("Orden capturada y carrito cerrado");
+            return ResponseEntity.ok(res);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error capturando la orden");
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
