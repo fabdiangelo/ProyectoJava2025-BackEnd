@@ -19,7 +19,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/paquetes")
-@PreAuthorize("hasAuthority('ADMIN')")
 public class PaqueteController {
 
     @Autowired
