@@ -2,7 +2,8 @@ package com.Tisj.api.controllers;
 
 import com.Tisj.bussines.entities.ArticuloCliente;
 import com.Tisj.services.ArticuloClienteService;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,11 @@ import com.Tisj.bussines.repositories.UsuarioRepository;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/articulos_cliente")
 public class ArticuloClienteController {
+
+    private static final Logger log = LoggerFactory.getLogger(ArticuloClienteController.class);
 
     @Autowired
     private ArticuloClienteService articuloClienteService;
@@ -150,6 +152,24 @@ public class ArticuloClienteController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    @PutMapping("/{id}/marcar-visto/{videoId}")
+    public ResponseEntity<Void> marcarVideoComoVisto(@PathVariable Long id, @PathVariable Long videoId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        ArticuloCliente ac = articuloClienteService.getArticuloClienteById(id);
+        if (ac == null || !ac.getUsuario().getEmail().equals(email)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            articuloClienteService.marcarVideoComoVisto(id, videoId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     // Endpoint POST para crear ArticuloCliente usando el DTO esencial para el usuario logueado

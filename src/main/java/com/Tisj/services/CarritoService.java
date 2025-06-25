@@ -29,6 +29,11 @@ public class CarritoService {
 
     private DTCarrito convertirADTO(Carrito carrito) {
         if (carrito == null) return null;
+<<<<<<< Pagos
+=======
+        
+        // Convertir los artículos a DTOs completos
+>>>>>>> main
         List<DTArticulo> articulosDTO = carrito.getItems().stream()
             .map(articulo -> new DTArticulo(
                 articulo.getId(),
@@ -39,6 +44,10 @@ public class CarritoService {
                 articulo.getActivo() != null ? articulo.getActivo() : true
             ))
             .collect(Collectors.toList());
+<<<<<<< Pagos
+=======
+        
+>>>>>>> main
         return new DTCarrito(
             carrito.getId(),
             carrito.getVencimiento(),

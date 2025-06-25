@@ -6,6 +6,7 @@ import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.bussines.repositories.ArticuloClienteRepository;
 import com.Tisj.bussines.repositories.UsuarioRepository;
 import com.Tisj.bussines.repositories.ArticuloRepository;
+import com.Tisj.bussines.repositories.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ public class ArticuloClienteService {
 
     @Autowired
     private ArticuloRepository articuloRepository;
+
+    @Autowired
+    private VideoRepository videoRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -143,14 +147,42 @@ public class ArticuloClienteService {
         return null;
     }
 
+    @Transactional
+    public ArticuloCliente marcarVideoComoVisto(Long articuloClienteId, Long videoId) {
+        ArticuloCliente ac = articuloClienteRepository.findById(articuloClienteId).orElse(null);
+        if (ac == null) {
+            throw new IllegalArgumentException("Inscripción no encontrada.");
+        }
+
+        // Optional: Validate that the video belongs to the course associated with this ArticuloCliente
+        boolean videoExists = videoRepository.existsById(videoId);
+        if (!videoExists) {
+            throw new IllegalArgumentException("Video no encontrado.");
+        }
+
+        ac.getVideosVistos().add(videoId);
+        return articuloClienteRepository.save(ac);
+    }
+
     public DTArticuloCliente toDTO(ArticuloCliente ac) {
+        double progreso = 0.0;
+        if (ac.getArticulo() instanceof com.Tisj.bussines.entities.Curso) {
+            com.Tisj.bussines.entities.Curso curso = (com.Tisj.bussines.entities.Curso) ac.getArticulo();
+            int totalVideos = curso.getVideos().size();
+            if (totalVideos > 0) {
+                progreso = ((double) ac.getVideosVistos().size() / totalVideos) * 100;
+            }
+        }
+
         return new DTArticuloCliente(
             ac.getId(),
             ac.getCaducidad(),
             ac.getEstado().name(),
             ac.getActivo(),
             ac.getArticulo().getId(),
-            ac.getUsuario().getEmail()
+            ac.getUsuario().getEmail(),
+            progreso,
+            ac.getVideosVistos()
         );
     }
 
@@ -185,12 +217,7 @@ public class ArticuloClienteService {
             return null;
         }
 
-        ArticuloCliente ac = new ArticuloCliente();
-        ac.setArticulo(articulo);
-        ac.setUsuario(usuario);
-        ac.setActivo(true); // Set activo to true by default
-        ac.setCaducidad(java.time.LocalDate.now().plusMonths(3)); // Set caducidad to 3 months from now
-        ac.setEstado(ArticuloCliente.Estado.ACTIVO); // Set estado to INCOMPLETO
+        ArticuloCliente ac = new ArticuloCliente(articulo, usuario);
 
         ArticuloCliente guardado = articuloClienteRepository.save(ac);
         return toDTO(guardado);
