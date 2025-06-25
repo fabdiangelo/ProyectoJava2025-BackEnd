@@ -3,6 +3,7 @@ package com.Tisj.services;
 import com.Tisj.bussines.entities.Carrito;
 import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.bussines.entities.DT.DTCarrito;
+import com.Tisj.bussines.entities.DT.DTArticulo;
 import com.Tisj.bussines.repositories.CarritoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,24 @@ public class CarritoService {
 
     private DTCarrito convertirADTO(Carrito carrito) {
         if (carrito == null) return null;
+        
+        // Convertir los artículos a DTOs completos
+        List<DTArticulo> articulosDTO = carrito.getItems().stream()
+            .map(articulo -> new DTArticulo(
+                articulo.getId(),
+                articulo.getNombre(),
+                articulo.getDescripcion(),
+                articulo.getPrecio(),
+                articulo.getVideoPresentacion(),
+                articulo.getActivo() != null ? articulo.getActivo() : true
+            ))
+            .collect(Collectors.toList());
+        
         return new DTCarrito(
             carrito.getId(),
             carrito.getVencimiento(),
             carrito.isActivo(),
-            carrito.getItems().stream().map(Articulo::getId).collect(Collectors.toList()),
+            articulosDTO,
             carrito.getPago() != null ? carrito.getPago().getId() : null,
             carrito.getUsuarioId(),
             carrito.getMontoTotal()
