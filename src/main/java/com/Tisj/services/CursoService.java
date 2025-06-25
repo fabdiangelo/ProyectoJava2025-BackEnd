@@ -5,6 +5,7 @@ import com.Tisj.api.requests.RequestVideo;
 import com.Tisj.bussines.entities.Curso;
 import com.Tisj.bussines.entities.Video;
 import com.Tisj.bussines.repositories.CursoRepository;
+import com.Tisj.bussines.repositories.VideoRepository;
 import com.Tisj.services.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ public class CursoService {
 
     @Autowired
     private OfertaService ofertaService;
+    @Autowired
+    private VideoRepository videoRepository;
 
     public List<Curso> getAllCursos() {
         return cursoRepository.findByActivoTrue();
@@ -40,11 +43,24 @@ public class CursoService {
 
     public Curso updateCurso(Long id, Curso curso) {
         Curso modificable = getCursoById(id);
-        if (modificable != null && curso != null) {
-            curso.setId(id);
-            curso.setPaquetes(modificable.getPaquetes());
-            curso.setActivo(true);
-            return cursoRepository.save(curso);
+        if (modificable != null) {
+            if(curso.getNombre() != null)
+                modificable.setNombre(curso.getNombre());
+            if(curso.getDescripcion() != null)
+                modificable.setDescripcion(curso.getDescripcion());
+            if(curso.getPrecio() != null)
+                modificable.setPrecio(curso.getPrecio());
+            if(curso.getVideoPresentacion() != null)
+                modificable.setVideoPresentacion(curso.getVideoPresentacion());
+            if(curso.getVideos() != null){
+                for(Video video : modificable.getVideos()){
+                    videoRepository.deleteById(video.getId());
+                }
+                modificable.setVideos(curso.getVideos());
+            }
+            if(curso.getActivo() != null)
+                modificable.setActivo(curso.getActivo());
+            return cursoRepository.save(modificable);
         }
         return null;
     }
@@ -67,9 +83,7 @@ public class CursoService {
             reqCurso.getPrecio(),
             reqCurso.getVideoPresentacion()
         );
-
-        // Guardar el curso para obtener el ID
-        curso = cursoRepository.save(curso);
+        cursoRepository.save(curso);
 
         // 2. Crear y asociar videos
         List<Video> videos = new ArrayList<>();
@@ -88,7 +102,13 @@ public class CursoService {
 
         // 3. Asignar los videos al curso y guardar el curso actualizado
         curso.setVideos(videos);
-        return cursoRepository.save(curso);
+
+        if(reqCurso.getActivo() != null) {
+            reqCurso.setActivo(reqCurso.getActivo());
+        }else{
+            reqCurso.setActivo(true);
+        }
+        return curso;
     }
 
     public List<Video> getVideosCursoById(Long id) {

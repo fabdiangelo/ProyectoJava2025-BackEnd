@@ -1,167 +1,167 @@
 package com.Tisj.services;
 
-import com.Tisj.api.pojo.PayPal.*;
-import com.Tisj.api.requests.RequestPago;
-import com.Tisj.api.config.PayPalConfig;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import com.Tisj.api.requests.RequestMP;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import java.util.Collections;
+import okhttp3.*;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Locale;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.math.RoundingMode;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PayPalService {
-    private final RestTemplate restTemplate;
-    private final PayPalConfig payPalConfig;
-    private static final Logger log = LoggerFactory.getLogger(PayPalService.class);
+    public String crearOrdenPayPal(RequestMP dto) throws IOException {
+        String clientId = System.getenv("PAYPAL_CLIENT_ID");
+        String clientSecret = System.getenv("PAYPAL_CLIENT_SECRET");
 
-    public AuthResponse authenticate() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(payPalConfig.getClientId(), payPalConfig.getClientSecret());
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        OkHttpClient client = new OkHttpClient();
+        ObjectMapper mapper = new ObjectMapper();
 
-        String body = "grant_type=client_credentials";
+        // 1. Obtener token de acceso
+        String credentials = Credentials.basic(clientId, clientSecret);
 
-        HttpEntity<String> request = new HttpEntity<>(body, headers);
-        ResponseEntity<AuthResponse> response = restTemplate.postForEntity(
-            payPalConfig.getAuthUrl(), 
-            request, 
-            AuthResponse.class
+        RequestBody tokenBody = new FormBody.Builder()
+                .add("grant_type", "client_credentials")
+                .build();
+
+        Request tokenRequest = new Request.Builder()
+                .url("https://api-m.sandbox.paypal.com/v1/oauth2/token")
+                .header("Authorization", credentials)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .post(tokenBody)
+                .build();
+
+        Response tokenResponse = client.newCall(tokenRequest).execute();
+        String tokenJson = tokenResponse.body().string();
+        String accessToken = mapper.readTree(tokenJson).get("access_token").asText();
+
+        // 2. Crear orden con los productos
+        List<Object> items = dto.getItems().stream().map(producto -> Map.of(
+                "name", producto.getNombre(),
+                "unit_amount", Map.of(
+                        "currency_code", "USD",
+                        "value", BigDecimal.valueOf(producto.getPrecio())
+                                .setScale(2, RoundingMode.HALF_UP)
+                                .toPlainString()
+                ),
+                "quantity", "1"
+        )).collect(Collectors.toList());
+
+        String total = calcularTotal(dto);
+
+        Map<String, Object> orderPayload = Map.of(
+                "intent", "CAPTURE",
+                "purchase_units", List.of(Map.of(
+                        "reference_id", dto.getUsuarioId() + "|" + dto.getCarritoId(),
+                        "items", items,
+                        "amount", Map.of(
+                                "currency_code", "USD",
+                                "value", total,
+                                "breakdown", Map.of(
+                                        "item_total", Map.of(
+                                                "currency_code", "USD",
+                                                "value", total
+                                        )
+                                )
+                        )
+                )),
+                "application_context", Map.of(
+                        "return_url", "https://solfuentes-prueba.netlify.app/pago-paypal",
+                        "cancel_url", "https://solfuentes-prueba.netlify.app/carrito"
+                )
         );
 
-        return response.getBody();
-    }
+        String json = mapper.writeValueAsString(orderPayload);
 
-    public ClientTokenResponse getClientToken() {
-        String accessToken = getAccessToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<?> request = new HttpEntity<>(headers);
-        ResponseEntity<ClientTokenResponse> response = restTemplate.postForEntity(
-            payPalConfig.getClientTokenUrl(),
-            request,
-            ClientTokenResponse.class
+        RequestBody orderBody = RequestBody.create(
+                json,
+                MediaType.parse("application/json")
         );
 
-        return response.getBody();
-    }
+        Request orderRequest = new Request.Builder()
+                .url("https://api-m.sandbox.paypal.com/v2/checkout/orders")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .post(orderBody)
+                .build();
 
-    public Root createOrder(RequestPago requestPago) {
-        // Validar datos de entrada
-        if (requestPago.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("El monto debe ser mayor que 0");
-        }
-        if (requestPago.getMoneda() == null || requestPago.getMoneda().length() != 3) {
-            throw new IllegalArgumentException("La moneda debe ser un código válido de 3 caracteres (ej: USD, EUR)");
-        }
-        if (requestPago.getReturnUrl() == null || !requestPago.getReturnUrl().startsWith("http")) {
-            throw new IllegalArgumentException("URL de retorno inválida");
-        }
-        if (requestPago.getCancelUrl() == null || !requestPago.getCancelUrl().startsWith("http")) {
-            throw new IllegalArgumentException("URL de cancelación inválida");
-        }
+        Response orderResponse = client.newCall(orderRequest).execute();
+        String orderJson = orderResponse.body().string();
 
-        String accessToken = getAccessToken();
+        System.out.println("Respuesta de PayPal:");
+        System.out.println(orderJson);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        JsonNode root = mapper.readTree(orderJson);
 
-        Root order = new Root();
-        order.setIntent("CAPTURE");
-        
-        PurchaseUnit purchaseUnit = new PurchaseUnit();
-        Amount amount = new Amount();
-        amount.setCurrency_code(requestPago.getMoneda());
-        amount.setValue(requestPago.getMonto().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
-        
-        purchaseUnit.setAmount(amount);
-        purchaseUnit.setDescription(requestPago.getDescripcion());
-        
-        // Configurar URLs de retorno y cancelación
-        Root.ApplicationContext applicationContext = new Root.ApplicationContext();
-        applicationContext.setReturn_url(requestPago.getReturnUrl());
-        applicationContext.setCancel_url(requestPago.getCancelUrl());
-        applicationContext.setBrand_name("Solariano");
-        applicationContext.setLanding_page("LOGIN");
-        applicationContext.setUser_action("PAY_NOW");
-
-        order.setApplication_context(applicationContext);
-        order.setPurchase_units(Collections.singletonList(purchaseUnit));
-
-        HttpEntity<Root> request = new HttpEntity<>(order, headers);
-        ResponseEntity<Root> response = restTemplate.postForEntity(
-            payPalConfig.getOrdersUrl(),
-            request,
-            Root.class
-        );
-
-        return response.getBody();
-    }
-
-    public Root captureOrder(String orderId) {
-        String accessToken = getAccessToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<?> request = new HttpEntity<>(headers);
-        ResponseEntity<Root> response = restTemplate.postForEntity(
-            payPalConfig.getCaptureUrl(orderId),
-            request,
-            Root.class
-        );
-
-        return response.getBody();
-    }
-
-    public Root getOrder(String orderId) {
-        try {
-            String accessToken = getAccessToken();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<?> request = new HttpEntity<>(headers);
-            ResponseEntity<Root> response = restTemplate.getForEntity(
-                payPalConfig.getOrdersUrl() + "/" + orderId,
-                Root.class
-            );
-
-            if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Error al obtener la orden de PayPal. Status: {}", response.getStatusCode());
-                throw new RuntimeException("Error al obtener la orden de PayPal: " + response.getStatusCode());
+        // Buscar el link de aprobación (rel: "approve")
+        for (JsonNode link : root.get("links")) {
+            if ("approve".equals(link.get("rel").asText())) {
+                return link.get("href").asText();
             }
+        }
 
-            return response.getBody();
-        } catch (Exception e) {
-            log.error("Error al obtener la orden de PayPal: {}", e.getMessage());
-            throw new RuntimeException("Error al obtener la orden de PayPal: " + e.getMessage());
+        throw new RuntimeException("No se encontró el enlace de aprobación de PayPal");
+    }
+
+    // Función auxiliar para calcular total
+    private String calcularTotal(RequestMP dto) {
+        BigDecimal total = dto.getItems().stream()
+                .map(i -> BigDecimal.valueOf(i.getPrecio()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Usar punto como separador decimal (PayPal requiere esto)
+        return total.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    public String capturarOrden(String orderId, String accessToken) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://api-m.sandbox.paypal.com/v2/checkout/orders/" + orderId + "/capture")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .post(RequestBody.create("", MediaType.parse("application/json")))
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            String body = response.body().string();
+            System.out.println("Respuesta al capturar: " + body);
+            return body;
         }
     }
 
-    private String getAccessToken() {
-        try {
-            AuthResponse authResponse = authenticate();
-            if (authResponse == null || authResponse.getAccessToken() == null) {
-                log.error("No se pudo obtener el token de acceso de PayPal");
-                throw new RuntimeException("Error de autenticación con PayPal: No se pudo obtener el token de acceso");
-            }
-            return authResponse.getAccessToken();
-        } catch (Exception e) {
-            log.error("Error al autenticar con PayPal: {}", e.getMessage());
-            throw new RuntimeException("Error de autenticación con PayPal: " + e.getMessage());
+    public String obtenerAccessToken() throws IOException {
+        String clientId = System.getenv("PAYPAL_CLIENT_ID");
+        String clientSecret = System.getenv("PAYPAL_CLIENT_SECRET");
+
+        OkHttpClient client = new OkHttpClient();
+
+        String credentials = Credentials.basic(clientId, clientSecret);
+
+        RequestBody tokenBody = new FormBody.Builder()
+                .add("grant_type", "client_credentials")
+                .build();
+
+        Request tokenRequest = new Request.Builder()
+                .url("https://api-m.sandbox.paypal.com/v1/oauth2/token")
+                .header("Authorization", credentials)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .post(tokenBody)
+                .build();
+
+        try (Response response = client.newCall(tokenRequest).execute()) {
+            String tokenJson = response.body().string();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(tokenJson).get("access_token").asText();
         }
     }
+
 }
 

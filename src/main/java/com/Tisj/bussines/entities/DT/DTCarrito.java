@@ -2,12 +2,17 @@ package com.Tisj.bussines.entities.DT;
 
 import java.time.LocalDate;
 import java.util.List;
+import com.Tisj.bussines.entities.DT.DTArticulo;
 
 public class DTCarrito {
     private Long id;
     private LocalDate vencimiento;
     private boolean activo;
+<<<<<<< Pagos
+    private List<DTArticulo> items; // Artículos completos
+=======
     private List<DTArticulo> items; // Información completa de los artículos
+>>>>>>> main
     private Long pago; // ID del pago
     private String usuario; // Email del usuario
     private Float montoTotal;

@@ -15,4 +15,5 @@ public class RequestCurso {
     private Float precio;
     private String videoPresentacion;
     private List<RequestVideo> videos;
+    private Boolean activo;
 }

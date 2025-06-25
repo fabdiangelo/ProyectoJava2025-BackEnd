@@ -29,8 +29,11 @@ public class CarritoService {
 
     private DTCarrito convertirADTO(Carrito carrito) {
         if (carrito == null) return null;
+<<<<<<< Pagos
+=======
         
         // Convertir los artículos a DTOs completos
+>>>>>>> main
         List<DTArticulo> articulosDTO = carrito.getItems().stream()
             .map(articulo -> new DTArticulo(
                 articulo.getId(),
@@ -41,7 +44,10 @@ public class CarritoService {
                 articulo.getActivo() != null ? articulo.getActivo() : true
             ))
             .collect(Collectors.toList());
+<<<<<<< Pagos
+=======
         
+>>>>>>> main
         return new DTCarrito(
             carrito.getId(),
             carrito.getVencimiento(),
@@ -196,14 +202,12 @@ public class CarritoService {
         try {
             Carrito carrito = carritoRepository.findById(carritoId)
                     .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado"));
-            
-            // TODO: Eliminar esta línea - Verificación de pago eliminada temporalmente para pruebas.
-            // if (carrito.getPago() == null) {
-            //     throw new IllegalStateException("No se puede cerrar un carrito sin pago asociado");
-            // }
 
             // Procesar la compra antes de desactivar el carrito
-            procesarCompraCarrito(carrito);
+            procesarCompraCarrito(carritoId);
+
+            // Generar Pago
+
             
             carrito.desactivar();
             return convertirADTO(carritoRepository.save(carrito));
@@ -214,7 +218,8 @@ public class CarritoService {
     }
 
     @Transactional
-    private void procesarCompraCarrito(Carrito carrito) {
+    public void procesarCompraCarrito(Long carritoId) {
+        Carrito carrito = carritoRepository.findById(carritoId).orElse(null);
         if (carrito == null || carrito.getItems() == null || carrito.getItems().isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío o es inválido");
         }
