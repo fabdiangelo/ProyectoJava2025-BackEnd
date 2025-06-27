@@ -39,7 +39,7 @@ public class CarritoService {
                 articulo.getActivo() != null ? articulo.getActivo() : true
             ))
             .collect(Collectors.toList());
-dd
+
         return new DTCarrito(
             carrito.getId(),
             carrito.getVencimiento(),

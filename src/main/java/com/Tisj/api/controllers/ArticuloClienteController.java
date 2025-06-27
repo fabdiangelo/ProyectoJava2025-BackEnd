@@ -15,8 +15,10 @@ import com.Tisj.bussines.entities.Articulo;
 import com.Tisj.bussines.entities.Usuario;
 import com.Tisj.bussines.repositories.ArticuloRepository;
 import com.Tisj.bussines.repositories.UsuarioRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/articulos_cliente")
@@ -202,5 +204,102 @@ public class ArticuloClienteController {
         }
         log.warn("Intento de crear ArticuloCliente sin autorización");
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Obtener cursos próximos a vencer (dentro de los próximos 7 días)
+     */
+    @GetMapping("/proximos-vencer")
+    public ResponseEntity<List<DTArticuloCliente>> getCursosProximosAVencer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
+            String email = auth.getName();
+            try {
+                List<ArticuloCliente> cursosProximos = articuloClienteService.getCursosProximosAVencer(email);
+                List<DTArticuloCliente> cursosDTO = cursosProximos.stream()
+                    .map(articuloClienteService::toDTO)
+                    .collect(Collectors.toList());
+                return ResponseEntity.ok(cursosDTO);
+            } catch (Exception e) {
+                log.error("Error al obtener cursos próximos a vencer para usuario {}: {}", email, e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    /**
+     * Obtener cursos vencidos del usuario
+     */
+    @GetMapping("/vencidos")
+    public ResponseEntity<List<DTArticuloCliente>> getCursosVencidos() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
+            String email = auth.getName();
+            try {
+                List<ArticuloCliente> cursosVencidos = articuloClienteService.getCursosVencidos(email);
+                List<DTArticuloCliente> cursosDTO = cursosVencidos.stream()
+                    .map(articuloClienteService::toDTO)
+                    .collect(Collectors.toList());
+                return ResponseEntity.ok(cursosDTO);
+            } catch (Exception e) {
+                log.error("Error al obtener cursos vencidos para usuario {}: {}", email, e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    /**
+     * Renovar la caducidad de un curso (extender por 3 meses más)
+     */
+    @PostMapping("/{id}/renovar")
+    public ResponseEntity<DTArticuloCliente> renovarCaducidad(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
+            String email = auth.getName();
+            try {
+                ArticuloCliente articuloCliente = articuloClienteService.getArticuloClienteById(id);
+                if (articuloCliente == null) {
+                    return ResponseEntity.notFound().build();
+                }
+                
+                // Verificar que el usuario sea el propietario del curso
+                if (!articuloCliente.getUsuario().getEmail().equals(email) && 
+                    !auth.getAuthorities().stream().anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+                
+                ArticuloCliente renovado = articuloClienteService.renovarCaducidad(id);
+                if (renovado != null) {
+                    DTArticuloCliente dto = articuloClienteService.toDTO(renovado);
+                    return ResponseEntity.ok(dto);
+                }
+                return ResponseEntity.badRequest().build();
+            } catch (Exception e) {
+                log.error("Error al renovar caducidad del curso {} para usuario {}: {}", id, email, e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    /**
+     * Ejecutar manualmente la actualización de cursos vencidos (solo para administradores)
+     */
+    @PostMapping("/actualizar-vencimientos")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> actualizarCursosVencidosManual() {
+        try {
+            articuloClienteService.actualizarCursosVencidos();
+            return ResponseEntity.ok("Actualización de cursos vencidos ejecutada exitosamente");
+        } catch (Exception e) {
+            log.error("Error al ejecutar actualización manual de cursos vencidos: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al ejecutar la actualización: " + e.getMessage());
+        }
     }
 }
