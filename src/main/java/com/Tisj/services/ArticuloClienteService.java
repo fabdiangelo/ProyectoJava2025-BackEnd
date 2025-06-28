@@ -8,7 +8,6 @@ import com.Tisj.bussines.repositories.UsuarioRepository;
 import com.Tisj.bussines.repositories.ArticuloRepository;
 import com.Tisj.bussines.repositories.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
@@ -16,7 +15,6 @@ import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.Tisj.bussines.entities.DT.DTArticuloCliente;
@@ -41,70 +39,6 @@ public class ArticuloClienteService {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    /**
-     * Tarea programada que se ejecuta diariamente a las 2:00 AM para actualizar
-     * automáticamente el estado de los cursos vencidos
-     */
-    @Scheduled(cron = "0 0 2 * * ?") // Ejecutar diariamente a las 2:00 AM
-    @Transactional
-    public void actualizarCursosVencidos() {
-        log.info("Iniciando actualización automática de cursos vencidos...");
-        
-        try {
-            List<ArticuloCliente> articulosCliente = articuloClienteRepository.findAll();
-            int cursosVencidos = 0;
-            
-            for (ArticuloCliente ac : articulosCliente) {
-                if (ac.getEstado() != ArticuloCliente.Estado.CADUCADO && 
-                    LocalDate.now().isAfter(ac.getCaducidad())) {
-                    ac.caducar();
-                    articuloClienteRepository.save(ac);
-                    cursosVencidos++;
-                    log.debug("Curso vencido actualizado: ID={}, Usuario={}, Curso={}", 
-                        ac.getId(), ac.getUsuario().getEmail(), ac.getArticulo().getNombre());
-                }
-            }
-            
-            log.info("Actualización completada. {} cursos marcados como vencidos.", cursosVencidos);
-        } catch (Exception e) {
-            log.error("Error durante la actualización automática de cursos vencidos: {}", e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Método para obtener cursos próximos a vencer (dentro de los próximos 7 días)
-     */
-    @Transactional(readOnly = true)
-    public List<ArticuloCliente> getCursosProximosAVencer(String email) {
-        LocalDate fechaLimite = LocalDate.now().plusDays(7);
-        return articuloClienteRepository.findByUsuarioEmailAndEstadoAndCaducidadBefore(email, 
-            ArticuloCliente.Estado.ACTIVO, fechaLimite);
-    }
-
-    /**
-     * Método para obtener cursos vencidos de un usuario
-     */
-    @Transactional(readOnly = true)
-    public List<ArticuloCliente> getCursosVencidos(String email) {
-        return articuloClienteRepository.findByUsuarioEmailAndEstado(email, ArticuloCliente.Estado.CADUCADO);
-    }
-
-    /**
-     * Método para renovar la caducidad de un curso (extender por 3 meses más)
-     */
-    @Transactional
-    public ArticuloCliente renovarCaducidad(Long articuloClienteId) {
-        ArticuloCliente articuloCliente = articuloClienteRepository.findById(articuloClienteId).orElse(null);
-        if (articuloCliente != null) {
-            articuloCliente.reiniciar(); // Esto establece la nueva caducidad a 3 meses desde hoy
-            articuloCliente = articuloClienteRepository.save(articuloCliente);
-            log.info("Caducidad renovada para curso: ID={}, Usuario={}, Nueva caducidad={}", 
-                articuloClienteId, articuloCliente.getUsuario().getEmail(), articuloCliente.getCaducidad());
-            return articuloCliente;
-        }
-        return null;
-    }
 
     @Transactional(readOnly = true)
     public List<ArticuloCliente> getAllArticulosCliente() {
