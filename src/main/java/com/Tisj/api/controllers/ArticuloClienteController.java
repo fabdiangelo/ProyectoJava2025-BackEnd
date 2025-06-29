@@ -71,7 +71,7 @@ public class ArticuloClienteController {
     public ResponseEntity<List<ArticuloCliente>> getArticulosCliente() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
             List<ArticuloCliente> articulosCliente = articuloClienteService.getAllArticulosCliente();
             return new ResponseEntity<>(articulosCliente, HttpStatus.OK);
         }
@@ -82,7 +82,7 @@ public class ArticuloClienteController {
     public ResponseEntity<ArticuloCliente> getArticuloCliente(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
             ArticuloCliente articuloCliente = articuloClienteService.getArticuloClienteById(id);
             if (articuloCliente != null) {
                 return new ResponseEntity<>(articuloCliente, HttpStatus.OK);
@@ -96,7 +96,7 @@ public class ArticuloClienteController {
     public ResponseEntity<ArticuloCliente> createArticuloCliente(@RequestBody ArticuloCliente articuloCliente) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
             ArticuloCliente nuevoArticuloCliente = articuloClienteService.createArticuloCliente(articuloCliente);
             return new ResponseEntity<>(nuevoArticuloCliente, HttpStatus.CREATED);
         }
@@ -107,7 +107,7 @@ public class ArticuloClienteController {
     public ResponseEntity<ArticuloCliente> updateArticuloCliente(@PathVariable Long id, @RequestBody ArticuloCliente articuloCliente) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
             ArticuloCliente articuloClienteActualizado = articuloClienteService.updateArticuloCliente(id, articuloCliente);
             if (articuloClienteActualizado != null) {
                 return new ResponseEntity<>(articuloClienteActualizado, HttpStatus.OK);
@@ -121,7 +121,7 @@ public class ArticuloClienteController {
     public ResponseEntity<Void> deleteArticuloCliente(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
             articuloClienteService.deleteArticuloCliente(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -159,19 +159,23 @@ public class ArticuloClienteController {
     @PutMapping("/{id}/marcar-visto/{videoId}")
     public ResponseEntity<Void> marcarVideoComoVisto(@PathVariable Long id, @PathVariable Long videoId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+        if (auth.getAuthorities().stream()
+                .anyMatch(p -> p.getAuthority().equals("USER") || p.getAuthority().equals("ADMIN"))) {
+            String email = auth.getName();
 
-        ArticuloCliente ac = articuloClienteService.getArticuloClienteById(id);
-        if (ac == null || !ac.getUsuario().getEmail().equals(email)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+            ArticuloCliente ac = articuloClienteService.getArticuloClienteById(id);
+            if (ac == null || !ac.getUsuario().getEmail().equals(email)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
 
-        try {
-            articuloClienteService.marcarVideoComoVisto(id, videoId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            try {
+                articuloClienteService.marcarVideoComoVisto(id, videoId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     // Endpoint POST para crear ArticuloCliente usando el DTO esencial para el usuario logueado
