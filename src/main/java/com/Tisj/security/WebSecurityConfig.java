@@ -56,12 +56,14 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher("/api/usuarios/**")).hasAnyAuthority("USER", "ADMIN") // Gestión de usuario logueado
                         .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/marcar-visto/{id}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher("/api/articulos/**")).hasAuthority("ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes/**")).permitAll() // Endpoints de paquete
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes")).permitAll() // Endpoints de paquete
                         .requestMatchers(antMatcher("/api/articulos_cliente/usuario/**")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos_cliente/completar/{id}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos_cliente/reiniciar/{id}")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos_cliente/{id}/marcar-visto/{videoId}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher("/api/articulos_cliente/**")).hasAuthority("ADMIN") // CRUD completo para ADMIN
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/carrito/me")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher("/api/carrito/**")).hasAnyAuthority("USER", "ADMIN")
