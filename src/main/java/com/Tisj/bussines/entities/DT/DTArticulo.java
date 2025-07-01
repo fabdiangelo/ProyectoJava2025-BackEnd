@@ -1,5 +1,11 @@
 package com.Tisj.bussines.entities.DT;
 
+import com.Tisj.bussines.entities.Articulo;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class DTArticulo {
     private Long id;
     private String nombre;
@@ -17,6 +23,15 @@ public class DTArticulo {
         this.precio = precio;
         this.videoPresentacion = videoPresentacion;
         this.activo = activo;
+    }
+
+    public DTArticulo(Articulo art) {
+        this.id = art.getId();
+        this.nombre = art.getNombre();
+        this.descripcion = art.getDescripcion();
+        this.precio = art.getPrecio();
+        this.videoPresentacion = art.getVideoPresentacion();
+        this.activo = art.getActivo();
     }
 
     // Getters y setters

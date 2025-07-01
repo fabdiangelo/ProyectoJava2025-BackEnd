@@ -52,6 +52,7 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/curso")).permitAll() // Listar cursos (público)
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/webhook")).permitAll() // Webhook de Mercado Pago (público)
                         .requestMatchers(antMatcher("/api/paypal/**")).permitAll() // Endpoints de PayPal
+                        .requestMatchers(antMatcher("/api/articulos/**")).permitAll() // Endpoints de articulos
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/usuarios")).permitAll() // Webhook de Mercado Pago (público)
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes/**")).permitAll() // Endpoints de paquete
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes")).permitAll() // Endpoints de paquete

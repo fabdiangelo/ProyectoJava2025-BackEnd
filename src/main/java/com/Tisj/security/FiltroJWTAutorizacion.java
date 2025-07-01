@@ -21,11 +21,12 @@ public class FiltroJWTAutorizacion extends OncePerRequestFilter {
             "/api/login",
             "/api/curso",
             "/api/mercado-pago/webhook",
-            "/api/paquete/**"
+            "/api/paquete/**",
+            "/api/articulos"
     );
 
     private boolean esRutaPublica(HttpServletRequest request) {
-        return rutasPublicas.contains(request.getRequestURI()) && request.getMethod().equals("POST");
+        return rutasPublicas.contains(request.getRequestURI());
     }
 
     private final String CLAVE =  System.getenv("SECRET_KEY");
