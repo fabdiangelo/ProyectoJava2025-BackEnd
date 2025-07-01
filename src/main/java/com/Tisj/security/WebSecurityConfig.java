@@ -51,13 +51,15 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher("/configuration/**")).permitAll()
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/curso")).permitAll() // Listar cursos (público)
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/webhook")).permitAll() // Webhook de Mercado Pago (público)
-                        .requestMatchers(antMatcher("/api/paypal/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de PayPal protegidos
+                        .requestMatchers(antMatcher("/api/paypal/**")).permitAll() // Endpoints de PayPal
+                        .requestMatchers(antMatcher("/api/articulos/**")).permitAll() // Endpoints de articulos
+
+                                       
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/usuarios")).permitAll() // Registro público
                         .requestMatchers(antMatcher("/api/usuarios/**")).hasAnyAuthority("USER", "ADMIN") // Gestión de usuario logueado
                         .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/marcar-visto/{id}")).hasAnyAuthority("USER", "ADMIN")
-                        .requestMatchers(antMatcher("/api/articulos/**")).hasAuthority("ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes/**")).permitAll() // Endpoints de paquete
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes")).permitAll() // Endpoints de paquete
                         .requestMatchers(antMatcher("/api/articulos_cliente/usuario/**")).hasAnyAuthority("USER", "ADMIN")

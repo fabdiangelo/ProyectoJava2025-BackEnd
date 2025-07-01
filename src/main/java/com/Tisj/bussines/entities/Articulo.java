@@ -53,9 +53,4 @@ public class Articulo {
         this.oferta = null;
         this.activo = activo;
     }
-
-    // Método getter manual para asegurar que esté disponible
-    public Boolean getActivo() {
-        return this.activo;
-    }
 }
