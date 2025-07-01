@@ -53,8 +53,8 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/webhook")).permitAll() // Webhook de Mercado Pago (público)
                         .requestMatchers(antMatcher("/api/paypal/**")).permitAll() // Endpoints de PayPal
                         .requestMatchers(antMatcher("/api/articulos/**")).permitAll() // Endpoints de articulos
-
-                                       
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/curso")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/curso")).permitAll()
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/usuarios")).permitAll() // Registro público
                         .requestMatchers(antMatcher("/api/usuarios/**")).hasAnyAuthority("USER", "ADMIN") // Gestión de usuario logueado
                         .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
