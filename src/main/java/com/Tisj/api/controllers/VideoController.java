@@ -32,7 +32,7 @@ public class VideoController {
     public ResponseEntity<List<Video>> getVideos() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("ADMIN") || p.getAuthority().equals("USER"))) {
             List<Video> videos = videoService.getAllVideos();
             return new ResponseEntity<>(videos, HttpStatus.OK);
         } else {
@@ -44,7 +44,7 @@ public class VideoController {
     public ResponseEntity<Video> getVideo(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("ADMIN") || p.getAuthority().equals("USER"))) {
             Video video = videoService.getVideoById(id);
             if (video != null) {
                 return new ResponseEntity<>(video, HttpStatus.OK);
@@ -60,7 +60,7 @@ public class VideoController {
     public ResponseEntity<?> getYoutubeVideo(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("ADMIN") || p.getAuthority().equals("USER"))) {
             Video video = videoService.getVideoById(id);
             if (video != null) {
                 String videoId = videoService.extractVideoId(video.getLink());
@@ -83,7 +83,7 @@ public class VideoController {
     public ResponseEntity<?> getYoutubeVideoInfo(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
+                .anyMatch(p -> p.getAuthority().equals("ADMIN") || p.getAuthority().equals("USER"))) {
             Video video = videoService.getVideoById(id);
             if (video != null) {
                 String videoId = videoService.extractVideoId(video.getLink());

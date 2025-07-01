@@ -53,32 +53,30 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/webhook")).permitAll() // Webhook de Mercado Pago (público)
                         .requestMatchers(antMatcher("/api/paypal/**")).permitAll() // Endpoints de PayPal
                         .requestMatchers(antMatcher("/api/articulos/**")).permitAll() // Endpoints de articulos
-                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/usuarios")).permitAll() // Webhook de Mercado Pago (público)
+
+                                       
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/usuarios")).permitAll() // Registro público
+                        .requestMatchers(antMatcher("/api/usuarios/**")).hasAnyAuthority("USER", "ADMIN") // Gestión de usuario logueado
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/articulos/{id}")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos/marcar-visto/{id}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes/**")).permitAll() // Endpoints de paquete
                         .requestMatchers(antMatcher(HttpMethod.GET,"/api/paquetes")).permitAll() // Endpoints de paquete
-
-                        // Rutas protegidas que requieren USER o ADMIN
-                        // Artículos Cliente (ejemplos, ajustar según lógica de negocio)
                         .requestMatchers(antMatcher("/api/articulos_cliente/usuario/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos_cliente/completar/{id}")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos_cliente/reiniciar/{id}")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.PUT, "/api/articulos_cliente/{id}/marcar-visto/{videoId}")).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(antMatcher("/api/articulos_cliente/**")).hasAuthority("ADMIN") // CRUD completo para ADMIN
-
-                        // Carrito
-                        // Regla específica para GET /api/carrito/me
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/carrito/me")).hasAnyAuthority("USER", "ADMIN")
-                        // Regla general para el resto de rutas del carrito (POST, PUT, DELETE, GET /{id}, GET /{id}/total)
-                        // Asumimos que todas requieren USER o ADMIN, ajustar si alguna es solo para ADMIN
                         .requestMatchers(antMatcher("/api/carrito/**")).hasAnyAuthority("USER", "ADMIN")
-
-                        // Otros controladores protegidos (ejemplos, ajustar según lógica de negocio)
-                        //.requestMatchers(antMatcher("/api/usuario/**")).hasAnyAuthority("USER", "ADMIN") // Gestión de usuario logueado, etc.
-                        .requestMatchers(antMatcher("/api/pedidos/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de pedidos
-                        .requestMatchers(antMatcher("/api/pago/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de pago
-                        .requestMatchers(antMatcher("/api/orders/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de Órdenes (PayPal)
-                        .requestMatchers(antMatcher("/api/oferta/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de oferta
-                        .requestMatchers(antMatcher("/api/video/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de video
-                        .requestMatchers(antMatcher("/api/youtube/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de YouTube
-                        .requestMatchers(antMatcher("/api/email/**")).hasAnyAuthority("USER", "ADMIN") // Endpoints de email
-                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/crear-preferencia ")).hasAnyAuthority("USER", "ADMIN") // Webhook de Mercado Pago (público)
+                        .requestMatchers(antMatcher("/api/pedidos/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher("/api/pago/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher("/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher("/api/oferta/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher("/api/video/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher("/api/youtube/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher("/api/email/**")).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/mercado-pago/crear-preferencia")).hasAnyAuthority("USER", "ADMIN") // Webhook de Mercado Pago (público)
 
                         // Cualquier otra petición requiere autenticación (esta regla actúa como "catch-all" para APIs no listadas específicamente, pero las anteriores tienen prioridad)
                         .anyRequest()
