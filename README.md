@@ -13,7 +13,7 @@
 ***  
 ## Etapa 1:
 ### Diagramas y diseño
-> [Diagrama (Excalidraw)](https://excalidraw.com/#json=2Ddtg5jPT2fgPwkpr6H56,rM8Mn0dxH2haRzyaGmPByQ)
+> [Diagrama (Excalidraw)](https://excalidraw.com/#json=c7m9c1PnuiYlsqW3XjScl,-pXepqYwd1XNt9BKAFFLBA)
 
 ***
 
