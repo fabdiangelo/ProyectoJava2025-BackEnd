@@ -9,10 +9,12 @@ import com.Tisj.bussines.repositories.VideoRepository;
 import com.Tisj.services.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class CursoService {
@@ -41,28 +43,44 @@ public class CursoService {
         return cursoRepository.save(curso);
     }
 
-    public Curso updateCurso(Long id, Curso curso) {
-        Curso modificable = getCursoById(id);
-        if (modificable != null) {
-            if(curso.getNombre() != null)
-                modificable.setNombre(curso.getNombre());
-            if(curso.getDescripcion() != null)
-                modificable.setDescripcion(curso.getDescripcion());
-            if(curso.getPrecio() != null)
-                modificable.setPrecio(curso.getPrecio());
-            if(curso.getVideoPresentacion() != null)
-                modificable.setVideoPresentacion(curso.getVideoPresentacion());
-            if(curso.getVideos() != null){
-                for(Video video : modificable.getVideos()){
-                    videoRepository.deleteById(video.getId());
-                }
-                modificable.setVideos(curso.getVideos());
-            }
-            if(curso.getActivo() != null)
-                modificable.setActivo(curso.getActivo());
-            return cursoRepository.save(modificable);
+    @Transactional
+    public Curso updateCurso(Long id, RequestCurso reqCurso) {
+        Optional<Curso> optCurso = cursoRepository.findById(id);
+        if (optCurso.isEmpty()) {
+            return null;
         }
-        return null;
+        Curso cursoExistente = optCurso.get();
+
+        // 1. Actualizar campos simples
+        if (reqCurso.getNombre() != null)
+            cursoExistente.setNombre(reqCurso.getNombre());
+        if (reqCurso.getDescripcion() != null)
+            cursoExistente.setDescripcion(reqCurso.getDescripcion());
+        if (reqCurso.getPrecio() != null)
+            cursoExistente.setPrecio(reqCurso.getPrecio());
+        if (reqCurso.getVideoPresentacion() != null)
+            cursoExistente.setVideoPresentacion(reqCurso.getVideoPresentacion());
+        if (reqCurso.getActivo() != null)
+            cursoExistente.setActivo(reqCurso.getActivo());
+
+        // 2. Vaciar la colección gestionada (mismos objetos List)
+        List<Video> videosGestión = cursoExistente.getVideos();
+        videosGestión.clear();
+
+        // 3. Añadir cada nuevo Video a la misma lista
+        for (RequestVideo rv : reqCurso.getVideos()) {
+            Video video = new Video(
+                    rv.getNombre(),
+                    rv.getDescripcion(),
+                    0f,
+                    rv.getLink()
+            );
+            video.setCurso(cursoExistente);
+            videosGestión.add(video);
+        }
+
+        // 4. Guardar: por el cascade, los videos se insertan y los viejos se eliminan
+        return cursoRepository.save(cursoExistente);
     }
 
     public boolean deleteCurso(Long id) {
@@ -83,7 +101,7 @@ public class CursoService {
             reqCurso.getPrecio(),
             reqCurso.getVideoPresentacion()
         );
-        cursoRepository.save(curso);
+        //cursoRepository.save(curso);
 
         // 2. Crear y asociar videos
         List<Video> videos = new ArrayList<>();
@@ -95,7 +113,7 @@ public class CursoService {
                 requestVideo.getLink()
             );
             video.setCurso(curso); // Asignar el curso al video
-            videoService.save(video);
+            //videoService.save(video);
             video = videoService.createVideo(video);
             videos.add(video);
         }
@@ -136,5 +154,32 @@ public class CursoService {
 
     public Curso getCursoByNombre(String nombre) {
         return cursoRepository.findByNombre(nombre);
+    }
+
+    @Transactional
+    public Curso nuevoCurso(RequestCurso reqCurso) {
+        // 1. Crear la entidad Curso y setear campos básicos
+        Curso curso = new Curso();
+        curso.setNombre(reqCurso.getNombre());
+        curso.setDescripcion(reqCurso.getDescripcion());
+        curso.setPrecio(reqCurso.getPrecio());
+        curso.setVideoPresentacion(reqCurso.getVideoPresentacion());
+        curso.setActivo(reqCurso.getActivo() != null ? reqCurso.getActivo() : true);
+
+        // 2. Construir la lista gestionada de videos (misma instancia de List)
+        List<Video> listaVideos = curso.getVideos();
+        for (RequestVideo rv : reqCurso.getVideos()) {
+            Video video = new Video(
+                    rv.getNombre(),
+                    rv.getDescripcion(),
+                    0f,
+                    rv.getLink()
+            );
+            video.setCurso(curso);
+            listaVideos.add(video);
+        }
+
+        // 3. Guardar el curso (por cascade = ALL se persisten también los videos)
+        return cursoRepository.save(curso);
     }
 }

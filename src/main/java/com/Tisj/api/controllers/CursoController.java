@@ -25,24 +25,19 @@ public class CursoController {
     private CursoService cursoService;
 
     @PostMapping
-    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso requestCurso) {
+    public ResponseEntity<Curso> createCurso(@RequestBody RequestCurso reqCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
+        if (!auth.getAuthorities().stream()
                 .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            
-            // Verificar que hay al menos un video
-            if (requestCurso.getVideos() == null || requestCurso.getVideos().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            Curso curso = cursoService.reqToCurso(requestCurso);
-            if (curso == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            return new ResponseEntity<>(curso, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+        if (reqCurso.getVideos() == null || reqCurso.getVideos().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Curso nuevo = cursoService.nuevoCurso(reqCurso);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
 
     @GetMapping
@@ -78,23 +73,23 @@ public class CursoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Curso> updateCurso(@PathVariable Long id, @RequestBody RequestCurso reqCurso) {
+    public ResponseEntity<Curso> updateCurso(@PathVariable Long id,
+                                             @RequestBody RequestCurso reqCurso) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream()
-                .anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
-            // Validar que hay al menos un video
+        if (auth.getAuthorities().stream().anyMatch(p -> p.getAuthority().equals("ADMIN"))) {
             if (reqCurso.getVideos() == null || reqCurso.getVideos().isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            Curso cursoActualizado = cursoService.updateCurso(id, cursoService.reqToCurso(reqCurso));
+            Curso cursoActualizado = cursoService.updateCurso(id, reqCurso);
             if (cursoActualizado == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(cursoActualizado, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
+
 
     @PutMapping("/{id}/videos/{videoId}")
     public ResponseEntity<Curso> updateVideosCurso(@PathVariable Long id, @PathVariable Long videoId) {

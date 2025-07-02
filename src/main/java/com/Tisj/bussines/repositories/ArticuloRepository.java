@@ -20,6 +20,9 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
            (:incluyeCurso = TRUE AND TYPE(a) = Curso) OR
            (:incluyePaquete = TRUE AND TYPE(a) = Paquete)
       )
+      AND (
+        a.activo
+      )
       AND (:precioMin IS NULL OR a.precio >= :precioMin)
       AND (:precioMax IS NULL OR a.precio <= :precioMax)
 """)

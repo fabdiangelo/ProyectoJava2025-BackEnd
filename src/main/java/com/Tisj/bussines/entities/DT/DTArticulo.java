@@ -1,6 +1,8 @@
 package com.Tisj.bussines.entities.DT;
 
 import com.Tisj.bussines.entities.Articulo;
+import com.Tisj.bussines.entities.Curso;
+import com.Tisj.bussines.entities.Paquete;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +15,7 @@ public class DTArticulo {
     private Float precio;
     private String videoPresentacion;
     private boolean activo;
+    private String tipo;
 
     public DTArticulo() {}
 
@@ -32,6 +35,8 @@ public class DTArticulo {
         this.precio = art.getPrecio();
         this.videoPresentacion = art.getVideoPresentacion();
         this.activo = art.getActivo();
+        this.tipo = art instanceof Curso ? "curso" :
+                art instanceof Paquete ? "paquete" : "articulo";
     }
 
     // Getters y setters

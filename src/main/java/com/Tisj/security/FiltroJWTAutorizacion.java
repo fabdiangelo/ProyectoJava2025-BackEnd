@@ -19,9 +19,7 @@ public class FiltroJWTAutorizacion extends OncePerRequestFilter {
     private static final List<String> rutasPublicas = List.of(
             "/api/usuarios",
             "/api/login",
-            "/api/curso",
             "/api/mercado-pago/webhook",
-            "/api/paquete/**",
             "/api/articulos"
     );
 
