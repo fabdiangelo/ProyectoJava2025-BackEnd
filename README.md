@@ -42,7 +42,6 @@
 - **Proveedor:** SupBase.
 
 ### APIs
-- **EMail:** Spring Framework Mail.
 - **Pagos:** 
   - PayPal Developer API
   - Mercado Pago Developer API.
