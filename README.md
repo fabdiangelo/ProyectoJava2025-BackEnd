@@ -9,7 +9,6 @@
 - Participantes:
     - [Fabricio Fuentes](https://github.com/fabdiangelo)
     - [Alex Zimmer](https://github.com/AlexZimmerBonjourAdrian)
-    - [Pablo De Leon]()
 ***  
 ## Etapa 1:
 ### Diagramas y diseño
@@ -49,3 +48,9 @@
 
 ## Listado de EndPoints
 > [EndPoint.md](EndPoints.md#plan-básico-de-endpoints)
+
+***
+
+## Guía para levantar la aplicación
+- Ingresar el archivo con las variables de ambiente proporcionado en la documentación.
+- Configurar un ambiente de ejecución con Java 21 utilizando como raiz "com.Tisj.SolarianoApplication", asignar como variables de ambiente el archivo .env creado en el paso anterior

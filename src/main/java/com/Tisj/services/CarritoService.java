@@ -224,11 +224,12 @@ public class CarritoService {
         // Por cada artículo en el carrito, crear un ArticuloCliente
         for (Articulo articulo : carrito.getItems()) {
             try {
-                articuloClienteService.comprarArticulo(emailUsuario, articulo.getId());
-                log.info("Artículo {} agregado al usuario {}", articulo.getId(), emailUsuario);
+                // Este método ahora encapsula toda la lógica
+                articuloClienteService.procesarCompra(emailUsuario, articulo.getId());
+                log.info("Artículo {} procesado para usuario {}", articulo.getId(), emailUsuario);
             } catch (Exception e) {
-                log.error("Error al procesar artículo {} para usuario {}: {}", 
-                    articulo.getId(), emailUsuario, e.getMessage());
+                log.error("Error al procesar artículo {} para usuario {}: {}",
+                        articulo.getId(), emailUsuario, e.getMessage());
                 throw new RuntimeException("Error al procesar la compra: " + e.getMessage());
             }
         }

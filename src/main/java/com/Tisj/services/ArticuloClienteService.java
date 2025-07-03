@@ -1,8 +1,6 @@
 package com.Tisj.services;
 
-import com.Tisj.bussines.entities.ArticuloCliente;
-import com.Tisj.bussines.entities.Usuario;
-import com.Tisj.bussines.entities.Articulo;
+import com.Tisj.bussines.entities.*;
 import com.Tisj.bussines.repositories.ArticuloClienteRepository;
 import com.Tisj.bussines.repositories.UsuarioRepository;
 import com.Tisj.bussines.repositories.ArticuloRepository;
@@ -18,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.Tisj.bussines.entities.DT.DTArticuloCliente;
 
@@ -297,5 +296,45 @@ public class ArticuloClienteService {
     public DTArticuloCliente getArticuloClienteByIdDT(Long id) {
         ArticuloCliente ac = articuloClienteRepository.findById(id).orElse(null);
         return ac != null ? toDTO(ac) : null;
+    }
+
+    @Transactional
+    public void procesarCompra(String email, Long articuloId) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        Articulo articulo = articuloRepository.findById(articuloId)
+                .orElseThrow(() -> new IllegalArgumentException("Artículo no encontrado"));
+
+        if (articulo instanceof Paquete paquete) {
+            // Si es un paquete, procesá cada curso dentro del paquete
+            for (Curso curso : paquete.getCursos()) {
+                asignarOExtender(usuario, curso);
+            }
+        } else if (articulo instanceof Curso curso) {
+            // Si es un curso, procesalo directamente
+            asignarOExtender(usuario, curso);
+        } else {
+            throw new IllegalStateException("Tipo de artículo desconocido: " + articulo.getClass());
+        }
+    }
+
+    private void asignarOExtender(Usuario usuario, Articulo articulo) {
+        Optional<ArticuloCliente> existenteOpt =
+                articuloClienteRepository.findByUsuarioAndArticulo(usuario, articulo);
+
+        if (existenteOpt.isPresent()) {
+            ArticuloCliente existente = existenteOpt.get();
+            // extendemos 3 meses más
+            existente.setCaducidad(existente.getCaducidad().plusMonths(3));
+            articuloClienteRepository.save(existente);
+        } else {
+            ArticuloCliente nuevo = new ArticuloCliente();
+            nuevo.setUsuario(usuario);
+            nuevo.setArticulo(articulo);
+            nuevo.setEstado(ArticuloCliente.Estado.ACTIVO);
+            nuevo.setCaducidad(LocalDate.now().plusMonths(3));
+            articuloClienteRepository.save(nuevo);
+        }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ArticuloClienteRepository extends JpaRepository<ArticuloCliente, Long> {
@@ -18,4 +19,6 @@ public interface ArticuloClienteRepository extends JpaRepository<ArticuloCliente
     // Nuevos métodos para manejo de vencimientos
     List<ArticuloCliente> findByUsuarioEmailAndEstado(String email, ArticuloCliente.Estado estado);
     List<ArticuloCliente> findByUsuarioEmailAndEstadoAndCaducidadBefore(String email, ArticuloCliente.Estado estado, LocalDate fecha);
+
+    Optional<ArticuloCliente> findByUsuarioAndArticulo(Usuario usuario, Articulo articulo);
 }
